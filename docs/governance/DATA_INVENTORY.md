@@ -2,10 +2,12 @@
 
 | Campo | Valor |
 | --- | --- |
-| Revisão | 2026-08-10 |
-| Escopo | MVP de vitrine, busca e carrinho local |
+| Revisão | 2026-08-12 |
+| Escopo | Fundação multitenant demonstrativa, busca e carrinho local |
 | Classificação | Sem coleta de dados pessoais |
 
-O catálogo é estático e o carrinho existe somente no estado de memória da aba. O MVP não possui conta, formulário, analytics, cookies próprios, banco de dados, pagamento, integração de entrega ou envio de pedido.
+Os dois catálogos demonstrativos contêm identificador técnico e slug do tenant, identidade fictícia, modalidades, categorias, produtos, preços e disponibilidade. O slug é usado somente para resolver a rota pública. O carrinho existe somente no estado de memória da aba. Não há conta, formulário, analytics, cookies próprios, banco, pagamento, endereço, integração de entrega ou envio de pedido.
 
-Qualquer persistência, identificação do cliente ou integração externa exige revisão deste inventário, definição de finalidade e retenção e atualização da política de privacidade antes da implementação.
+Os identificadores e papéis de domínio representam contratos futuros, não pessoas cadastradas. Antes de persistir tenants, usuários, clientes ou pedidos, este inventário deverá registrar campos, finalidade, base legal, origem, compartilhamento, retenção, descarte e controles de acesso.
+
+O envio por WhatsApp e as modalidades de retirada/entrega permanecem bloqueados até a definição dos dados mínimos e da governança aplicável.

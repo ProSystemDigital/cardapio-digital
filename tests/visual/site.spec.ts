@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("cardápio permite filtrar, buscar e montar o carrinho", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/cardapio/mesa-viva");
 
   await expect(page.getByRole("heading", { level: 1 })).toContainText("prato favorito");
   await expect(page.getByRole("heading", { name: "Nosso cardápio" })).toBeVisible();
@@ -22,7 +22,29 @@ test("cardápio permite filtrar, buscar e montar o carrinho", async ({ page }) =
 });
 
 test("layout não cria rolagem horizontal nas viewports suportadas", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/cardapio/mesa-viva");
   const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scrollWidth: document.documentElement.scrollWidth }));
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.width);
+});
+
+test("resolve tenants por slug sem misturar seus produtos", async ({ page }) => {
+  await page.goto("/cardapio/casa-do-porto");
+
+  await expect(page.getByLabel("Casa do Porto, início")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Peixe grelhado" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Burger Mesa Viva" })).toHaveCount(0);
+  await expect(page.getByText("mesa · retirada", { exact: true })).toBeVisible();
+});
+
+test("apresenta estado seguro para tenant inexistente", async ({ page }) => {
+  const response = await page.goto("/cardapio/tenant-inexistente");
+
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { name: "Estabelecimento não encontrado" })).toBeVisible();
+});
+
+test("a raiz redireciona para o catálogo demonstrativo padrão", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(page).toHaveURL(/\/cardapio\/mesa-viva$/);
 });

@@ -7,10 +7,12 @@
 | `docs/standards/DEVELOPMENT_POLICY.md` | Política permanente de desenvolvimento | Oficial |
 | `AGENTS.md` | Regras operacionais para agentes | Oficial |
 | `README.md` | Produto, execução e validação | Atual |
-| `docs/hka-field/TECHNICAL_ROADMAP.md` | Evolução planejada do cardápio | Atual |
-| `docs/architecture/adr/0001-isolamento-e-mvp-local.md` | Decisão de isolamento e escopo local | Aceito |
+| `docs/product/PRODUCT_DECISIONS.md` | D-001 a D-006 e requisitos de evolução | Aceito |
+| `docs/hka-field/TECHNICAL_ROADMAP.md` | Evolução planejada do produto | Atual |
+| `docs/architecture/adr/0001-isolamento-e-mvp-local.md` | Isolamento e escopo local | Aceito |
+| `docs/architecture/adr/0002-fundacao-saas-multitenant.md` | Fundação multitenant e jornada inicial | Aceito |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
-| `docs/governance/DATA_INVENTORY.md` | Dados tratados no MVP | Atual |
+| `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |
 | `docs/engineering/DEPENDENCY_INVENTORY.md` | Dependências e verificações | Atual |
 | `docs/operations/DEVELOPMENT_ENVIRONMENT.md` | Execução local | Aplicável |

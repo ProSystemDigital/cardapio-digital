@@ -1,5 +1,5 @@
-import MenuExperience from "./components/MenuExperience/MenuExperience";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <MenuExperience />;
+  redirect("/cardapio/mesa-viva");
 }
