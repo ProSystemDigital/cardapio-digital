@@ -5,6 +5,14 @@ import { resolve } from "node:path";
 const migrationsDirectory = resolve(process.cwd(), "database", "migrations");
 const up = readFileSync(resolve(migrationsDirectory, "0001_initial_schema.up.sql"), "utf8");
 const down = readFileSync(resolve(migrationsDirectory, "0001_initial_schema.down.sql"), "utf8");
+const integrationTest = readFileSync(
+  resolve(process.cwd(), "database", "tests", "multitenant-isolation.sql"),
+  "utf8",
+);
+const localRunner = readFileSync(
+  resolve(process.cwd(), "scripts", "database", "test-local-postgres.ps1"),
+  "utf8",
+);
 
 const tenantTables = [
   "tenants",
@@ -83,4 +91,21 @@ test("esquema não antecipa dados pessoais", () => {
   for (const column of personalDataColumns) {
     expect(up.toLowerCase()).not.toContain(column);
   }
+});
+
+test("gate local usa recursos descartáveis e papel sem bypass de RLS", () => {
+  expect(localRunner).toContain('$testDatabase = "cardapio_digital_test"');
+  expect(localRunner).toContain('$runtimeRole = "cardapio_runtime_test"');
+  expect(localRunner).toContain("NOSUPERUSER");
+  expect(localRunner).toContain("NOBYPASSRLS");
+  expect(localRunner).toContain("Remove-Item Env:\\PGPASSWORD");
+  expect(localRunner).toContain("--if-exists --force");
+});
+
+test("teste PostgreSQL cobre negação, isolamento e snapshots", () => {
+  expect(integrationTest).toContain("RLS expôs linhas sem contexto de tenant");
+  expect(integrationTest).toContain("RLS não isolou a leitura do tenant A");
+  expect(integrationTest).toContain("referência cruzada entre tenants foi aceita");
+  expect(integrationTest).toContain("snapshot histórico mudou com o catálogo");
+  expect(integrationTest).toContain("SET ROLE cardapio_runtime_test");
 });

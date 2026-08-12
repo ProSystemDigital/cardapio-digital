@@ -21,3 +21,28 @@ Os arquivos em `database/migrations/` são uma especificação arquitetural revi
 3. criar banco local descartável sem dados pessoais;
 4. validar `up`, isolamento RLS, referências cruzadas e `down` com testes de integração;
 5. somente então avaliar provisionamento e segredos por ambiente.
+
+## Validação local no Windows
+
+Ferramentas detectadas: PostgreSQL 18 em `127.0.0.1:5432` e pgAdmin 4. O executor usa os binários oficiais em `C:\Program Files\PostgreSQL\18\bin` e não exige dependência npm.
+
+Execute o gate; o prompt seguro mantém a senha somente na memória do processo:
+
+```powershell
+.\scripts\database\test-local-postgres.ps1
+```
+
+O script:
+
+1. recusa continuar se o banco ou o papel fixo de teste já existirem;
+2. cria um papel sem login, sem superusuário e sem `BYPASSRLS`;
+3. cria somente `cardapio_digital_test`;
+4. executa migration `up`, testes reais de RLS e snapshots e migration `down`;
+5. confirma ausência de tabelas e executa um segundo `up`;
+6. remove o banco, o papel, `PGPASSWORD` e as referências temporárias no bloco de limpeza.
+
+Não copie a senha para `.env`, histórico, argumento de linha de comando ou pgAdmin salvo. O Neon permanece desconectado até um gate posterior de provisionamento e segredos.
+
+## Evidência da execução local
+
+Em 2026-08-12, o gate foi executado com sucesso no PostgreSQL 18 local. A saída final confirmou `up`, negação RLS sem contexto, isolamento entre dois tenants, bloqueio de referência cruzada, preservação de snapshots, `down` sem tabelas residuais e novo `up`. O `DROP ROLE` subsequente confirmou a limpeza do papel descartável. Nenhuma senha foi registrada no repositório ou fornecida ao agente.

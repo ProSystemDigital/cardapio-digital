@@ -70,3 +70,11 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - Pedidos preservam nomes e preços como snapshots, sem antecipar dados pessoais.
 - Migrations possuem avanço e reversão transacionais e permanecem imutáveis depois de aplicadas.
 - Nesta etapa não há banco provisionado, conexão, credencial, autenticação, API ou execução remota.
+
+## Fase 2.1 — Ferramentas e validação local
+
+- pgAdmin 4 é a interface humana padrão para administração e inspeção.
+- `psql` executa migrations e testes de forma reproduzível.
+- PostgreSQL 18 local hospeda somente o banco descartável de validação.
+- Neon Postgres Console é a escolha para o futuro ambiente remoto, ainda sem conexão ou credencial.
+- O gate deve comprovar negação sem tenant, isolamento entre dois tenants, bloqueio de referências cruzadas, snapshots e `up/down/up`.

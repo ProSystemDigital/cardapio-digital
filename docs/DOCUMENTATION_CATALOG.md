@@ -16,6 +16,7 @@
 | `docs/architecture/adr/0005-cotacao-local-por-modalidade.md` | Modalidade, compatibilidade, mínimo, taxa e total | Aceito |
 | `docs/architecture/adr/0006-rascunho-imutavel-e-previa-de-mensagem.md` | Revalidação, resumo imutável e prévia textual | Aceito |
 | `docs/architecture/adr/0007-postgresql-e-isolamento-multitenant.md` | Persistência relacional, RLS e referências por tenant | Em avaliação |
+| `docs/architecture/adr/0008-ferramentas-de-persistencia.md` | PostgreSQL local, pgAdmin 4, psql e Neon planejado | Em avaliação |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |

@@ -69,6 +69,8 @@ npm run test:pwa:existing-build
 
 Variáveis futuras devem ser documentadas em `.env.example` somente com placeholders. Arquivos `.env*`, credenciais e vínculos locais de hospedagem permanecem ignorados.
 
+A validação PostgreSQL usa um banco local descartável e o executor documentado em `docs/operations/DATABASE_MIGRATIONS.md`. pgAdmin 4 é a interface administrativa escolhida; Neon permanece apenas como provedor remoto planejado, sem conexão nesta fase.
+
 ## Governança
 
 O projeto segue a Carta da Engenharia, o HKA FIELD Engineering Guide e as políticas versionadas em `docs/`. As decisões D-001 a D-006 e seus limites estão em `docs/product/PRODUCT_DECISIONS.md` e no ADR 0002. Mudanças em persistência, dados pessoais, autenticação, pagamentos ou integrações exigem atualização prévia da arquitetura, governança e riscos.
