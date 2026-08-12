@@ -7,7 +7,8 @@
 | 1.2. Modelo operacional | Concluída | Horários, modalidades por produto, variações, adicionais, regras monetárias e validação integral. |
 | 1.3. Personalização do item | Concluída | Modal acessível, carrinho por linhas, edição e preço recalculado pelo catálogo. |
 | 1.4. Modalidade e cotação | Concluída | Mesa, retirada, entrega, compatibilidade, mínimo, taxa e total local. |
-| 1.5. Rascunho e prévia | Em avaliação | Revalidação, resumo imutável, mensagem determinística e cópia local. |
+| 1.5. Rascunho e prévia | Concluída | Revalidação, resumo imutável, mensagem determinística e cópia local. |
+| 2.0. Fundação da persistência | Em avaliação | ADR PostgreSQL, esquema relacional, isolamento RLS e rollback, ainda sem banco provisionado. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |
@@ -27,8 +28,8 @@
 
 ## Próximas decisões
 
-1. Avaliar visual e funcionalmente o rascunho e a prévia textual.
-2. Registrar ADR de persistência e isolamento PostgreSQL.
+1. Avaliar ADR, esquema SQL, RLS e estratégia de rollback da fundação persistente.
+2. Executar a migration em PostgreSQL local descartável somente após aprovação e seleção da ferramenta.
 3. Definir matriz de permissões e eventos da trilha de auditoria.
 4. Detalhar exceções de horário, áreas e regras de entrega.
 5. Modelar os dados pessoais mínimos por modalidade antes da coleta.

@@ -61,3 +61,12 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - A interface identifica permanentemente “Prévia — pedido não enviado”.
 - Copiar exige ação do usuário e uma falha de clipboard não fecha nem apaga a prévia.
 - Não existe link para WhatsApp, navegação externa, API, webhook ou persistência.
+
+## Fase 2.0 — Fundação da persistência
+
+- PostgreSQL é a tecnologia escolhida para avaliação da persistência relacional.
+- Entidades pertencentes ao estabelecimento carregam tenant e não admitem referências cruzadas.
+- RLS nega leitura e escrita quando o backend não estabelece um contexto válido de tenant.
+- Pedidos preservam nomes e preços como snapshots, sem antecipar dados pessoais.
+- Migrations possuem avanço e reversão transacionais e permanecem imutáveis depois de aplicadas.
+- Nesta etapa não há banco provisionado, conexão, credencial, autenticação, API ou execução remota.

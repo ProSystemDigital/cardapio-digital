@@ -17,5 +17,8 @@
 | CD-13 | Cotação local ser interpretada como pedido confirmado | P1 | Mitigado | Identificar a cotação como demonstrativa e manter envio desabilitado. |
 | CD-14 | Prévia usar preço ou disponibilidade desatualizados | P1 | Mitigado localmente | Reconstruir linhas e recalcular cotação antes da prévia; repetir obrigatoriamente no backend futuro. |
 | CD-15 | Cópia da mensagem ser interpretada como envio ou confirmação | P1 | Parcialmente mitigado | Exibir aviso permanente, não abrir WhatsApp e não declarar confirmação; contrato operacional ainda pendente. |
+| CD-16 | Persistência permitir leitura ou referência entre tenants | P0 | Mitigação em avaliação | Exigir `tenant_id`, chaves compostas, RLS forçada e testes negativos; validar em PostgreSQL local antes de provisionar ambiente. |
+| CD-17 | Migration irreversível causar perda ou indisponibilidade | P0 | Mitigação em avaliação | Manter `up`/`down` transacionais, migrations aplicadas imutáveis e testar backup, restauração e rollback antes do primeiro ambiente persistente. |
+| CD-18 | Runtime privilegiado contornar RLS | P0 | Aberto | Proibir superusuário, proprietário das tabelas e `BYPASSRLS` no runtime; validar papéis antes da conexão da aplicação. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

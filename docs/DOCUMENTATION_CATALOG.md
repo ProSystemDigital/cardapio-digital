@@ -14,12 +14,14 @@
 | `docs/architecture/adr/0003-modelo-operacional-do-catalogo.md` | Horários, modalidades, preços e personalização | Aceito |
 | `docs/architecture/adr/0004-carrinho-por-linhas-configuradas.md` | Personalização e cálculo autoritativo do carrinho | Aceito |
 | `docs/architecture/adr/0005-cotacao-local-por-modalidade.md` | Modalidade, compatibilidade, mínimo, taxa e total | Aceito |
-| `docs/architecture/adr/0006-rascunho-imutavel-e-previa-de-mensagem.md` | Revalidação, resumo imutável e prévia textual | Em avaliação |
+| `docs/architecture/adr/0006-rascunho-imutavel-e-previa-de-mensagem.md` | Revalidação, resumo imutável e prévia textual | Aceito |
+| `docs/architecture/adr/0007-postgresql-e-isolamento-multitenant.md` | Persistência relacional, RLS e referências por tenant | Em avaliação |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |
 | `docs/engineering/DEPENDENCY_INVENTORY.md` | Dependências e verificações | Atual |
 | `docs/operations/DEVELOPMENT_ENVIRONMENT.md` | Execução local | Aplicável |
+| `docs/operations/DATABASE_MIGRATIONS.md` | Imutabilidade, transação e rollback de migrations | Em avaliação |
 | `docs/standards/CODING_STANDARDS.md` | Convenções de código | Em evolução |
 | `docs/standards/SECURITY_POLICY.md` | Segurança institucional | Em evolução |
 

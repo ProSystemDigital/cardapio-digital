@@ -15,6 +15,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - validação integral do catálogo antes da exposição;
 - interface responsiva, acessível e instalável como PWA;
 - fallback offline para indisponibilidade de navegação.
+- especificação revisável de PostgreSQL com isolamento multitenant e rollback, ainda sem banco conectado.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -24,10 +25,11 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `data/`: configuração demonstrativa substituível por fonte persistida futura;
 - `data/catalog-repository.ts`: contrato e implementação temporária em memória;
 - `app/`: apresentação Next.js e estado efêmero da experiência;
-- `tests/unit/`: invariantes de tenant, catálogo e carrinho;
+- `database/migrations/`: esquema SQL transacional e reversível, ainda não executado;
+- `tests/unit/`: invariantes de tenant, catálogo, carrinho e estrutura persistente;
 - `tests/visual/` e `tests/pwa/`: comportamento no navegador e operação offline.
 
-Banco de dados, autenticação, autorização, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
+Banco provisionado ou conectado, autenticação, autorização, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
 
 Variações e adicionais podem ser selecionados em uma caixa de diálogo acessível. Antes da prévia, todas as linhas e valores são reconstruídos pelo catálogo atual. A mensagem pode ser copiada localmente, mas não abre WhatsApp, não solicita dados pessoais e não envia ou confirma um pedido.
 
