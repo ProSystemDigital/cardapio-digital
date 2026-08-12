@@ -22,3 +22,12 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - A jornada de mesa deverá definir identificação da mesa; entrega deverá definir endereço, área, taxa e horário; retirada deverá definir janela e identificação do cliente.
 - O envio por WhatsApp deverá apresentar resumo e consentimento do cliente, sem afirmar confirmação ou aceite automático pelo estabelecimento.
 - Pagamento online exigirá ADR, análise de fornecedor, segurança, privacidade e conciliação antes da implementação.
+
+## Fase 1.2 — Modelo operacional do catálogo
+
+- Preços, pedido mínimo, taxas, variações e adicionais usam centavos inteiros.
+- Cada produto declara as modalidades em que pode ser atendido, sempre como subconjunto das modalidades do tenant.
+- Horários semanais são configuráveis, mas “aberto agora” dependerá de regras futuras para fuso, feriados e exceções.
+- Grupos de adicionais declaram limites mínimo e máximo verificáveis.
+- Catálogos inconsistentes são rejeitados antes de serem entregues à interface.
+- Seleção de personalizações e cálculo de pedido personalizado permanecem adiados para uma jornada de UX própria.

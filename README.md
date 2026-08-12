@@ -9,6 +9,8 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - vitrine por categoria e busca por nome e descrição;
 - carrinho local com quantidades e subtotal calculado em centavos;
 - regras de domínio puras e testadas;
+- horários, modalidades por produto, variações e adicionais demonstrativos;
+- validação integral do catálogo antes da exposição;
 - interface responsiva, acessível e instalável como PWA;
 - fallback offline para indisponibilidade de navegação.
 
@@ -24,6 +26,8 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `tests/visual/` e `tests/pwa/`: comportamento no navegador e operação offline.
 
 Banco de dados, autenticação, autorização, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
+
+Variações e adicionais já possuem contratos e validações, mas ainda não podem ser selecionados no carrinho. Pedido mínimo e taxa de entrega são apenas informativos até a implementação da jornada de modalidade e personalização.
 
 Tenants demonstrativos:
 

@@ -55,7 +55,7 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
           <span className={styles.brandMark}>{tenant.shortName}</span>
           <span>{tenant.displayName}<small>{tenant.tagline}</small></span>
         </a>
-        <div className={styles.status}><span /> Aberto agora · até 22h30</div>
+        <div className={styles.status}><span /> Horários configurados</div>
         <button className={styles.cartButton} onClick={() => setCartOpen(true)} aria-label={`Abrir carrinho com ${itemCount} itens`}>
           <FaShoppingBag aria-hidden="true" /> Carrinho
           <span>{itemCount}</span>
@@ -104,7 +104,7 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
         <div className={styles.cartItems}>
           {cartItems.length ? cartItems.map((product) => <div className={styles.cartItem} key={product.id}><span aria-hidden="true">{product.emoji}</span><div><strong>{product.name}</strong><small>{formatPrice(product.priceInCents)}</small></div><div className={styles.quantity}><button onClick={() => changeQuantity(product.id, -1)} aria-label={`Remover uma unidade de ${product.name}`}><FaMinus /></button><span>{cart[product.id]}</span><button onClick={() => changeQuantity(product.id, 1)} aria-label={`Adicionar uma unidade de ${product.name}`}><FaPlus /></button></div></div>) : <div className={styles.emptyCart}><span>🛍️</span><h3>Seu carrinho está vazio</h3><p>Adicione um prato para começar o pedido.</p></div>}
         </div>
-        <div className={styles.summary}><div><span>Subtotal</span><strong>{formatPrice(subtotalInCents)}</strong></div><small>Envio por WhatsApp, taxas e atendimento serão implementados em fase futura.</small><button disabled>Pedidos em breve</button></div>
+        <div className={styles.summary}><div><span>Subtotal</span><strong>{formatPrice(subtotalInCents)}</strong></div><small>Pedido mínimo demonstrativo: {formatPrice(tenant.operations.minimumOrderInCents)}{tenant.operations.deliveryFeeInCents !== undefined ? ` · entrega: ${formatPrice(tenant.operations.deliveryFeeInCents)}` : ""}. Envio por WhatsApp será implementado em fase futura.</small><button disabled>Pedidos em breve</button></div>
       </aside>
     </main>
   );

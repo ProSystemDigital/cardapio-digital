@@ -1,4 +1,5 @@
-import { isCatalogScopedToTenant, type TenantCatalog } from "../domain/catalog";
+import type { TenantCatalog } from "../domain/catalog";
+import { validateCatalog } from "../domain/catalog-validation";
 import { demoCatalogs } from "./demo-catalogs";
 
 export interface CatalogRepository {
@@ -10,19 +11,21 @@ export class InMemoryCatalogRepository implements CatalogRepository {
   readonly #catalogsBySlug: ReadonlyMap<string, TenantCatalog>;
 
   constructor(catalogs: readonly TenantCatalog[]) {
-    const validCatalogs = catalogs.filter(isCatalogScopedToTenant);
-    const slugs = new Set(validCatalogs.map((catalog) => catalog.tenant.slug));
+    const invalidCatalog = catalogs.find((catalog) => validateCatalog(catalog).length > 0);
+    const slugs = new Set(catalogs.map((catalog) => catalog.tenant.slug));
 
-    if (validCatalogs.length !== catalogs.length) {
-      throw new Error("Catálogo rejeitado por violar o escopo do tenant.");
+    if (invalidCatalog) {
+      throw new Error(
+        `Catálogo ${invalidCatalog.tenant.slug} rejeitado: ${validateCatalog(invalidCatalog).join(" ")}`,
+      );
     }
 
-    if (slugs.size !== validCatalogs.length) {
+    if (slugs.size !== catalogs.length) {
       throw new Error("Catálogo rejeitado por possuir slug de tenant duplicado.");
     }
 
     this.#catalogsBySlug = new Map(
-      validCatalogs.map((catalog) => [catalog.tenant.slug, catalog]),
+      catalogs.map((catalog) => [catalog.tenant.slug, catalog]),
     );
   }
 

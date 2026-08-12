@@ -4,6 +4,7 @@
 | --- | --- | --- |
 | 0. Isolamento, governança e segurança | Concluída | Repositório isolado, documentação base, vulnerabilidade transitiva corrigida e riscos registrados. |
 | 1. Fundação do domínio | Concluída | Contratos multitenant, resolução por slug, repositório em memória, catálogo externo à UI e testes de isolamento. |
+| 1.2. Modelo operacional | Em avaliação | Horários, modalidades por produto, variações, adicionais, regras monetárias e validação integral. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |
@@ -23,10 +24,11 @@
 
 ## Próximas decisões
 
-1. Escolher persistência e estratégia de isolamento físico/lógico por tenant.
-2. Definir matriz de permissões e eventos da trilha de auditoria.
-3. Detalhar adicionais, variações, horários, disponibilidade e precificação.
-4. Modelar os dados pessoais mínimos por modalidade e atualizar a governança antes da coleta.
-5. Definir contrato operacional do WhatsApp e critérios de confirmação do pedido.
+1. Avaliar visual e funcionalmente o modelo operacional demonstrativo.
+2. Escolher persistência e estratégia de isolamento físico/lógico por tenant.
+3. Definir matriz de permissões e eventos da trilha de auditoria.
+4. Detalhar exceções de horário, áreas e regras de entrega.
+5. Modelar os dados pessoais mínimos por modalidade antes da coleta.
+6. Definir contrato operacional do WhatsApp e critérios de confirmação do pedido.
 
 Toda entrega executa testes unitários, lint, tipos, testes responsivos, build e teste PWA conforme aplicabilidade.
