@@ -31,3 +31,13 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - Grupos de adicionais declaram limites mínimo e máximo verificáveis.
 - Catálogos inconsistentes são rejeitados antes de serem entregues à interface.
 - Seleção de personalizações e cálculo de pedido personalizado permanecem adiados para uma jornada de UX própria.
+
+## Fase 1.3 — Jornada de personalização
+
+- Produtos simples são adicionados diretamente; produtos configuráveis abrem uma caixa de diálogo.
+- Variações obrigatórias, limites de adicionais e indisponibilidade são validados no domínio.
+- A interface envia somente IDs; o preço unitário é recalculado pelo catálogo.
+- Configurações iguais acumulam quantidade e configurações diferentes permanecem em linhas distintas.
+- Linhas podem ser editadas, removidas e ter sua quantidade alterada.
+- O subtotal considera preço unitário configurado e quantidade, ainda sem taxas ou pagamento.
+- A caixa de diálogo oferece foco inicial, ciclo de foco, fechamento por `Escape` e retorno ao acionador.

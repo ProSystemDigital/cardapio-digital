@@ -1,0 +1,154 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(16, 38, 29, 0.72);
+}
+
+.dialog {
+  width: min(36rem, 100%);
+  max-height: min(46rem, calc(100vh - 2rem));
+  overflow-y: auto;
+  border-radius: 1.5rem;
+  background: var(--card);
+  padding: 1.5rem;
+  box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.28);
+
+  header,
+  footer,
+  label {
+    display: flex;
+    align-items: center;
+  }
+
+  header {
+    justify-content: space-between;
+    gap: 1rem;
+
+    p {
+      color: var(--leaf);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    button {
+      display: grid;
+      place-items: center;
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border-radius: 50%;
+      background: #edf0ea;
+      cursor: pointer;
+    }
+  }
+
+  fieldset {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+    border: 0;
+
+    legend {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+
+      small {
+        float: right;
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 400;
+      }
+    }
+  }
+
+  label {
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    padding: 0.75rem;
+    cursor: pointer;
+
+    input {
+      width: 1.15rem;
+      height: 1.15rem;
+      accent-color: var(--leaf);
+    }
+
+    span {
+      flex: 1;
+    }
+
+    strong {
+      font-size: 0.85rem;
+    }
+  }
+
+  footer {
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+
+    button {
+      min-height: 2.9rem;
+      border-radius: 999px;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  }
+}
+
+.description {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+.errors {
+  margin-top: 1rem;
+  border-radius: 0.75rem;
+  background: #fff0ee;
+  color: #8a241a;
+  padding: 0.8rem;
+  font-size: 0.85rem;
+}
+
+.cancel {
+  background: #edf0ea;
+  color: var(--ink);
+}
+
+.confirm {
+  background: var(--forest);
+  color: white;
+}
+
+@media (max-width: 560px) {
+  .backdrop {
+    align-items: end;
+    padding: 0;
+  }
+
+  .dialog {
+    max-height: 92vh;
+    border-radius: 1.25rem 1.25rem 0 0;
+    padding: 1.2rem;
+
+    footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+}

@@ -11,7 +11,8 @@
 | `docs/hka-field/TECHNICAL_ROADMAP.md` | Evolução planejada do produto | Atual |
 | `docs/architecture/adr/0001-isolamento-e-mvp-local.md` | Isolamento e escopo local | Aceito |
 | `docs/architecture/adr/0002-fundacao-saas-multitenant.md` | Fundação multitenant e jornada inicial | Aceito |
-| `docs/architecture/adr/0003-modelo-operacional-do-catalogo.md` | Horários, modalidades, preços e personalização | Em avaliação |
+| `docs/architecture/adr/0003-modelo-operacional-do-catalogo.md` | Horários, modalidades, preços e personalização | Aceito |
+| `docs/architecture/adr/0004-carrinho-por-linhas-configuradas.md` | Personalização e cálculo autoritativo do carrinho | Em avaliação |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |

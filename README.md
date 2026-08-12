@@ -7,7 +7,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - identidade, modalidades e catálogo configuráveis por tenant;
 - resolução pública do estabelecimento por `/cardapio/[tenantSlug]`;
 - vitrine por categoria e busca por nome e descrição;
-- carrinho local com quantidades e subtotal calculado em centavos;
+- carrinho local por linhas configuradas, com edição, quantidades e subtotal em centavos;
 - regras de domínio puras e testadas;
 - horários, modalidades por produto, variações e adicionais demonstrativos;
 - validação integral do catálogo antes da exposição;
@@ -27,7 +27,7 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 
 Banco de dados, autenticação, autorização, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
 
-Variações e adicionais já possuem contratos e validações, mas ainda não podem ser selecionados no carrinho. Pedido mínimo e taxa de entrega são apenas informativos até a implementação da jornada de modalidade e personalização.
+Variações e adicionais podem ser selecionados em uma caixa de diálogo acessível. O preço é sempre recalculado pelo catálogo a partir dos IDs escolhidos. Pedido mínimo e taxa de entrega continuam apenas informativos até a implementação da jornada de modalidade.
 
 Tenants demonstrativos:
 

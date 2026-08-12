@@ -1,17 +1,24 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { FaMinus, FaPlus, FaSearch, FaShoppingBag, FaTimes } from "react-icons/fa";
+import { useCallback, useMemo, useState } from "react";
+import { FaMinus, FaPen, FaPlus, FaSearch, FaShoppingBag, FaTimes, FaTrash } from "react-icons/fa";
 import {
   ALL_CATEGORIES,
-  changeCartQuantity,
   filterProducts,
-  getCartItemCount,
-  getCartSubtotalInCents,
-  type Cart,
   type CategoryFilter,
 } from "../../../domain/cart";
-import type { FulfillmentMode, TenantCatalog } from "../../../domain/catalog";
+import type { FulfillmentMode, Product, TenantCatalog } from "../../../domain/catalog";
+import {
+  addOrMergeCartLine,
+  changeLineQuantity,
+  createCartLine,
+  getLineItemCount,
+  getLinesSubtotalInCents,
+  replaceCartLine,
+  type CartLine,
+  type ProductSelection,
+} from "../../../domain/order-cart";
+import ProductCustomizer from "../ProductCustomizer/ProductCustomizer";
 import styles from "./MenuExperience.module.scss";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -25,27 +32,68 @@ function formatPrice(priceInCents: number) {
   return currency.format(priceInCents / 100);
 }
 
+type CustomizationTarget = { product: Product; line?: CartLine };
+
 export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCatalog }>) {
   const { tenant, categories, products } = catalog;
   const [category, setCategory] = useState<CategoryFilter>(ALL_CATEGORIES);
   const [query, setQuery] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState<Cart>({});
+  const [lines, setLines] = useState<readonly CartLine[]>([]);
+  const [customization, setCustomization] = useState<CustomizationTarget | null>(null);
+  const [cartError, setCartError] = useState("");
 
   const visibleProducts = useMemo(
     () => filterProducts(products, category, query),
     [category, products, query],
   );
-
-  const cartItems = products.filter((product) => cart[product.id]);
-  const itemCount = getCartItemCount(cart);
-  const subtotalInCents = getCartSubtotalInCents(products, cart);
-  const categoryNames = new Map<string, string>(
-    categories.map((item) => [item.id, item.name]),
+  const productsById = useMemo(
+    () => new Map(products.map((product) => [product.id, product])),
+    [products],
   );
+  const categoryNames = useMemo(
+    () => new Map(categories.map((item) => [item.id, item.name])),
+    [categories],
+  );
+  const itemCount = getLineItemCount(lines);
+  const subtotalInCents = getLinesSubtotalInCents(lines);
 
-  const changeQuantity = (id: string, change: number) => {
-    setCart((current) => changeCartQuantity(current, id, change));
+  const closeCustomizer = useCallback(() => setCustomization(null), []);
+
+  const commitSelection = (selection: ProductSelection, editingLine?: CartLine) => {
+    const result = createCartLine(catalog, selection, editingLine?.id ?? crypto.randomUUID());
+    if (!result.ok) return result.errors;
+
+    setLines((current) =>
+      editingLine
+        ? replaceCartLine(current, { ...result.line, quantity: editingLine.quantity })
+        : addOrMergeCartLine(current, result.line),
+    );
+    setCustomization(null);
+    setCartError("");
+    return [];
+  };
+
+  const addProduct = (product: Product) => {
+    if (product.variations?.length || product.addonGroups?.length) {
+      setCustomization({ product });
+      return;
+    }
+
+    const errors = commitSelection({
+      tenantId: tenant.id,
+      productId: product.id,
+      addonIds: [],
+    });
+    setCartError(errors.join(" "));
+  };
+
+  const lineDetails = (line: CartLine, product: Product) => {
+    const variation = product.variations?.find((item) => item.id === line.variationId)?.name;
+    const addonNames = (product.addonGroups ?? []).flatMap((group) =>
+      group.addons.filter((addon) => line.addonIds.includes(addon.id)).map((addon) => addon.name),
+    );
+    return [variation, ...addonNames].filter(Boolean).join(" · ");
   };
 
   return (
@@ -57,17 +105,12 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
         </a>
         <div className={styles.status}><span /> Horários configurados</div>
         <button className={styles.cartButton} onClick={() => setCartOpen(true)} aria-label={`Abrir carrinho com ${itemCount} itens`}>
-          <FaShoppingBag aria-hidden="true" /> Carrinho
-          <span>{itemCount}</span>
+          <FaShoppingBag aria-hidden="true" /> Carrinho<span>{itemCount}</span>
         </button>
       </header>
 
       <section className={styles.hero} id="inicio">
-        <div>
-          <p className={styles.eyebrow}>Sabor local · ingredientes frescos</p>
-          <h1>Seu próximo prato favorito está aqui.</h1>
-          <p>Escolha com calma, personalize seu pedido e deixe o resto com a nossa cozinha.</p>
-        </div>
+        <div><p className={styles.eyebrow}>Sabor local · ingredientes frescos</p><h1>Seu próximo prato favorito está aqui.</h1><p>Escolha com calma, personalize seu pedido e deixe o resto com a nossa cozinha.</p></div>
         <aside><span>Tempo médio</span><strong>25–35 min</strong><small>{tenant.fulfillmentModes.map((mode) => fulfillmentLabels[mode]).join(" · ")}</small></aside>
       </section>
 
@@ -84,11 +127,11 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
           <div className={styles.grid}>
             {visibleProducts.map((product) => (
               <article className={styles.card} key={product.id}>
-                <div className={styles.foodVisual} aria-hidden="true"><span>{product.emoji}</span>{product.tag && <small>{product.tag}</small>}</div>
+                <div className={styles.foodVisual} aria-hidden="true"><span>{product.emoji}</span>{product.tag ? <small>{product.tag}</small> : null}</div>
                 <div className={styles.cardContent}>
                   <div><p>{categoryNames.get(product.categoryId)}</p><h3>{product.name}</h3></div>
                   <p className={styles.description}>{product.description}</p>
-                  <div className={styles.cardFooter}><strong>{formatPrice(product.priceInCents)}</strong><button onClick={() => changeQuantity(product.id, 1)} aria-label={`Adicionar ${product.name} ao carrinho`}><FaPlus aria-hidden="true" /> Adicionar</button></div>
+                  <div className={styles.cardFooter}><strong>{product.variations?.length ? "A partir de " : ""}{formatPrice(product.priceInCents)}</strong><button onClick={() => addProduct(product)} aria-label={`${product.variations?.length || product.addonGroups?.length ? "Personalizar" : "Adicionar"} ${product.name}`}><FaPlus aria-hidden="true" /> {product.variations?.length || product.addonGroups?.length ? "Personalizar" : "Adicionar"}</button></div>
                 </div>
               </article>
             ))}
@@ -98,14 +141,22 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
 
       <footer className={styles.footer}><strong>{tenant.displayName}</strong><p>Cardápio demonstrativo · preços em reais</p><a href="#inicio">Voltar ao topo ↑</a></footer>
 
-      {cartOpen && <button className={styles.backdrop} onClick={() => setCartOpen(false)} aria-label="Fechar carrinho" />}
+      {cartOpen ? <button className={styles.backdrop} onClick={() => setCartOpen(false)} aria-label="Fechar carrinho" /> : null}
       <aside className={`${styles.drawer} ${cartOpen ? styles.drawerOpen : ""}`} aria-label="Carrinho" aria-hidden={!cartOpen}>
-        <div className={styles.drawerHeader}><div><p className={styles.eyebrow}>Seu pedido</p><h2>Carrinho</h2></div><button onClick={() => setCartOpen(false)} aria-label="Fechar carrinho"><FaTimes /></button></div>
+        <div className={styles.drawerHeader}><div><p className={styles.eyebrow}>Seu pedido</p><h2>Carrinho</h2></div><button onClick={() => setCartOpen(false)} aria-label="Fechar carrinho"><FaTimes aria-hidden="true" /></button></div>
         <div className={styles.cartItems}>
-          {cartItems.length ? cartItems.map((product) => <div className={styles.cartItem} key={product.id}><span aria-hidden="true">{product.emoji}</span><div><strong>{product.name}</strong><small>{formatPrice(product.priceInCents)}</small></div><div className={styles.quantity}><button onClick={() => changeQuantity(product.id, -1)} aria-label={`Remover uma unidade de ${product.name}`}><FaMinus /></button><span>{cart[product.id]}</span><button onClick={() => changeQuantity(product.id, 1)} aria-label={`Adicionar uma unidade de ${product.name}`}><FaPlus /></button></div></div>) : <div className={styles.emptyCart}><span>🛍️</span><h3>Seu carrinho está vazio</h3><p>Adicione um prato para começar o pedido.</p></div>}
+          {lines.length ? lines.map((line) => {
+            const product = productsById.get(line.productId);
+            if (!product) return null;
+            const details = lineDetails(line, product);
+            return <div className={styles.cartItem} key={line.id}><span aria-hidden="true">{product.emoji}</span><div><strong>{product.name}</strong>{details ? <small>{details}</small> : null}<small>{formatPrice(line.unitPriceInCents)} cada</small><div className={styles.lineActions}>{product.variations?.length || product.addonGroups?.length ? <button onClick={() => setCustomization({ product, line })}><FaPen aria-hidden="true" /> Editar</button> : null}<button onClick={() => setLines((current) => changeLineQuantity(current, line.id, -line.quantity))}><FaTrash aria-hidden="true" /> Remover</button></div></div><div className={styles.quantity}><button onClick={() => setLines((current) => changeLineQuantity(current, line.id, -1))} aria-label={`Remover uma unidade de ${product.name}`}><FaMinus aria-hidden="true" /></button><span>{line.quantity}</span><button onClick={() => setLines((current) => changeLineQuantity(current, line.id, 1))} aria-label={`Adicionar uma unidade de ${product.name}`}><FaPlus aria-hidden="true" /></button></div></div>;
+          }) : <div className={styles.emptyCart}><span>🛍️</span><h3>Seu carrinho está vazio</h3><p>Adicione um prato para começar o pedido.</p></div>}
+          {cartError ? <p className={styles.cartError} role="alert">{cartError}</p> : null}
         </div>
         <div className={styles.summary}><div><span>Subtotal</span><strong>{formatPrice(subtotalInCents)}</strong></div><small>Pedido mínimo demonstrativo: {formatPrice(tenant.operations.minimumOrderInCents)}{tenant.operations.deliveryFeeInCents !== undefined ? ` · entrega: ${formatPrice(tenant.operations.deliveryFeeInCents)}` : ""}. Envio por WhatsApp será implementado em fase futura.</small><button disabled>Pedidos em breve</button></div>
       </aside>
+
+      {customization ? <ProductCustomizer product={customization.product} initialSelection={customization.line} formatPrice={formatPrice} onCancel={closeCustomizer} onConfirm={(selection) => commitSelection(selection, customization.line)} /> : null}
     </main>
   );
 }

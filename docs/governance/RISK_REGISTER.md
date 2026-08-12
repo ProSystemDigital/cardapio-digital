@@ -11,6 +11,7 @@
 | CD-07 | Abertura/envio no WhatsApp ser interpretado como pedido confirmado | P1 | Aberto | Definir estados e confirmação humana; não confirmar pedido automaticamente. |
 | CD-08 | Pagamento online ampliar escopo regulatório e operacional sem controles | P0 | Aberto | Exigir ADR, fornecedor avaliado, conciliação, privacidade e segurança antes da integração. |
 | CD-09 | Horário semanal indicar abertura incorreta em feriados, fusos ou exceções | P1 | Aberto | Não calcular “aberto agora” até modelar fuso, exceções e intervalos operacionais. |
-| CD-10 | Personalização gerar preço ou combinação inválida | P1 | Parcialmente mitigado | Validar centavos e limites no domínio; adiar seleção e cálculo até existir jornada testada. |
+| CD-10 | Personalização gerar preço ou combinação inválida | P1 | Mitigado no carrinho local | Recalcular pelo catálogo e testar pertencimento, disponibilidade, limites, edição e subtotal; repetir validação no checkout futuro. |
+| CD-11 | Linha ficar desatualizada após mudança do catálogo | P1 | Aberto | Revalidar e recalcular todas as linhas no servidor antes da futura confirmação do pedido. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

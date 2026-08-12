@@ -1,10 +1,7 @@
 import { expect, test } from "@playwright/test";
 import {
   ALL_CATEGORIES,
-  changeCartQuantity,
   filterProducts,
-  getCartItemCount,
-  getCartSubtotalInCents,
 } from "../../domain/cart";
 import { isCatalogScopedToTenant } from "../../domain/catalog";
 import { validateCatalog } from "../../domain/catalog-validation";
@@ -33,19 +30,6 @@ test("filtra somente produtos disponíveis por categoria e busca", () => {
   expect(
     filterProducts([...mesaVivaCatalog.products, unavailableProduct], ALL_CATEGORIES, ""),
   ).not.toContainEqual(unavailableProduct);
-});
-
-test("altera quantidades e remove itens zerados", () => {
-  const withTwoItems = changeCartQuantity({}, "burger", 2);
-  expect(getCartItemCount(withTwoItems)).toBe(2);
-
-  const emptyCart = changeCartQuantity(withTwoItems, "burger", -2);
-  expect(emptyCart).toEqual({});
-});
-
-test("calcula subtotal em centavos sem aritmética de ponto flutuante", () => {
-  const cart = { burger: 2, limonada: 1 };
-  expect(getCartSubtotalInCents(mesaVivaCatalog.products, cart)).toBe(10_200);
 });
 
 test("resolve somente o catálogo associado ao slug solicitado", async () => {
