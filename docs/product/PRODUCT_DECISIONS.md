@@ -41,3 +41,13 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - Linhas podem ser editadas, removidas e ter sua quantidade alterada.
 - O subtotal considera preço unitário configurado e quantidade, ainda sem taxas ou pagamento.
 - A caixa de diálogo oferece foco inicial, ciclo de foco, fechamento por `Escape` e retorno ao acionador.
+
+## Fase 1.4 — Modalidade e cotação local
+
+- O cliente escolhe somente entre modalidades habilitadas pelo tenant.
+- Uma troca incompatível é rejeitada e informa os produtos responsáveis.
+- Subtotal, taxa de entrega, total e valor faltante para o mínimo são calculados em centavos.
+- Taxa é aplicada somente à entrega e nunca é recebida da interface.
+- A cotação se atualiza a cada mudança nas linhas ou na modalidade.
+- Mesa não solicita número; retirada não solicita identificação; entrega não solicita endereço.
+- Mesmo uma cotação válida não habilita envio, persistência ou confirmação do pedido.

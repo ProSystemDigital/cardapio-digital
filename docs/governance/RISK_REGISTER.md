@@ -13,5 +13,7 @@
 | CD-09 | Horário semanal indicar abertura incorreta em feriados, fusos ou exceções | P1 | Aberto | Não calcular “aberto agora” até modelar fuso, exceções e intervalos operacionais. |
 | CD-10 | Personalização gerar preço ou combinação inválida | P1 | Mitigado no carrinho local | Recalcular pelo catálogo e testar pertencimento, disponibilidade, limites, edição e subtotal; repetir validação no checkout futuro. |
 | CD-11 | Linha ficar desatualizada após mudança do catálogo | P1 | Aberto | Revalidar e recalcular todas as linhas no servidor antes da futura confirmação do pedido. |
+| CD-12 | Modalidade incompatível ou taxa incorreta produzir total enganoso | P1 | Mitigado na cotação local | Rejeitar troca incompatível e derivar mínimo/taxa do tenant; repetir cálculo no servidor no checkout futuro. |
+| CD-13 | Cotação local ser interpretada como pedido confirmado | P1 | Mitigado | Identificar a cotação como demonstrativa e manter envio desabilitado. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

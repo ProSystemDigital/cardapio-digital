@@ -13,11 +13,12 @@ import {
   changeLineQuantity,
   createCartLine,
   getLineItemCount,
-  getLinesSubtotalInCents,
   replaceCartLine,
   type CartLine,
   type ProductSelection,
 } from "../../../domain/order-cart";
+import { calculateOrderQuote } from "../../../domain/order-quote";
+import FulfillmentSelector from "../FulfillmentSelector/FulfillmentSelector";
 import ProductCustomizer from "../ProductCustomizer/ProductCustomizer";
 import styles from "./MenuExperience.module.scss";
 
@@ -42,6 +43,8 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
   const [lines, setLines] = useState<readonly CartLine[]>([]);
   const [customization, setCustomization] = useState<CustomizationTarget | null>(null);
   const [cartError, setCartError] = useState("");
+  const [fulfillmentMode, setFulfillmentMode] = useState<FulfillmentMode | null>(null);
+  const [fulfillmentError, setFulfillmentError] = useState("");
 
   const visibleProducts = useMemo(
     () => filterProducts(products, category, query),
@@ -56,7 +59,7 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
     [categories],
   );
   const itemCount = getLineItemCount(lines);
-  const subtotalInCents = getLinesSubtotalInCents(lines);
+  const quote = calculateOrderQuote(catalog, lines, fulfillmentMode);
 
   const closeCustomizer = useCallback(() => setCustomization(null), []);
 
@@ -94,6 +97,21 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
       group.addons.filter((addon) => line.addonIds.includes(addon.id)).map((addon) => addon.name),
     );
     return [variation, ...addonNames].filter(Boolean).join(" · ");
+  };
+
+  const selectFulfillmentMode = (mode: FulfillmentMode) => {
+    const candidate = calculateOrderQuote(catalog, lines, mode);
+    if (candidate.incompatibleLineIds.length > 0) {
+      const names = candidate.incompatibleLineIds
+        .map((lineId) => lines.find((line) => line.id === lineId))
+        .map((line) => line && productsById.get(line.productId)?.name)
+        .filter(Boolean)
+        .join(", ");
+      setFulfillmentError(`Modalidade incompatível com: ${names}.`);
+      return;
+    }
+    setFulfillmentMode(mode);
+    setFulfillmentError("");
   };
 
   return (
@@ -144,6 +162,8 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
       {cartOpen ? <button className={styles.backdrop} onClick={() => setCartOpen(false)} aria-label="Fechar carrinho" /> : null}
       <aside className={`${styles.drawer} ${cartOpen ? styles.drawerOpen : ""}`} aria-label="Carrinho" aria-hidden={!cartOpen}>
         <div className={styles.drawerHeader}><div><p className={styles.eyebrow}>Seu pedido</p><h2>Carrinho</h2></div><button onClick={() => setCartOpen(false)} aria-label="Fechar carrinho"><FaTimes aria-hidden="true" /></button></div>
+        <FulfillmentSelector modes={tenant.fulfillmentModes} selectedMode={fulfillmentMode} onSelect={selectFulfillmentMode} />
+        {fulfillmentError ? <p className={styles.fulfillmentError} role="alert">{fulfillmentError}</p> : null}
         <div className={styles.cartItems}>
           {lines.length ? lines.map((line) => {
             const product = productsById.get(line.productId);
@@ -153,7 +173,15 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
           }) : <div className={styles.emptyCart}><span>🛍️</span><h3>Seu carrinho está vazio</h3><p>Adicione um prato para começar o pedido.</p></div>}
           {cartError ? <p className={styles.cartError} role="alert">{cartError}</p> : null}
         </div>
-        <div className={styles.summary}><div><span>Subtotal</span><strong>{formatPrice(subtotalInCents)}</strong></div><small>Pedido mínimo demonstrativo: {formatPrice(tenant.operations.minimumOrderInCents)}{tenant.operations.deliveryFeeInCents !== undefined ? ` · entrega: ${formatPrice(tenant.operations.deliveryFeeInCents)}` : ""}. Envio por WhatsApp será implementado em fase futura.</small><button disabled>Pedidos em breve</button></div>
+        <div className={styles.summary} aria-live="polite">
+          <div><span>Subtotal</span><strong>{formatPrice(quote.subtotalInCents)}</strong></div>
+          {fulfillmentMode === "delivery" ? <div><span>Taxa de entrega</span><strong>{formatPrice(quote.deliveryFeeInCents)}</strong></div> : null}
+          <div className={styles.total}><span>Total</span><strong>{formatPrice(quote.totalInCents)}</strong></div>
+          {quote.missingMinimumInCents > 0 && lines.length > 0 ? <p className={styles.minimumWarning}>Faltam {formatPrice(quote.missingMinimumInCents)} para o pedido mínimo.</p> : null}
+          {!fulfillmentMode ? <small>Selecione mesa, retirada ou entrega para calcular a cotação.</small> : <small>Cotação demonstrativa para {fulfillmentLabels[fulfillmentMode]}. Nenhum pedido foi enviado.</small>}
+          <button disabled aria-describedby="order-status">Pedidos em breve</button>
+          <span id="order-status" className={styles.srOnly}>{quote.canContinue ? "Cotação válida, envio ainda indisponível." : quote.errors.join(" ")}</span>
+        </div>
       </aside>
 
       {customization ? <ProductCustomizer product={customization.product} initialSelection={customization.line} formatPrice={formatPrice} onCancel={closeCustomizer} onConfirm={(selection) => commitSelection(selection, customization.line)} /> : null}

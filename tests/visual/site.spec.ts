@@ -23,6 +23,9 @@ test("cardápio permite filtrar, buscar e montar o carrinho", async ({ page }) =
   await expect(page.getByLabel("Carrinho").getByText("Burger Mesa Viva")).toBeVisible();
   await expect(page.getByLabel("Carrinho").getByText("Bacon", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Carrinho").getByText("R$ 50,00 cada")).toBeVisible();
+  await page.getByRole("radio", { name: /Entrega/ }).click();
+  await expect(page.getByLabel("Carrinho").getByText("Taxa de entrega")).toBeVisible();
+  await expect(page.getByLabel("Carrinho").getByText("R$ 57,00")).toBeVisible();
 });
 
 test("layout não cria rolagem horizontal nas viewports suportadas", async ({ page }) => {
@@ -76,4 +79,28 @@ test("personaliza, valida e edita uma linha sem aceitar preço da interface", as
   await editDialog.getByRole("radio", { name: /Individual/ }).check();
   await editDialog.getByRole("button", { name: "Salvar alterações" }).click();
   await expect(cart.getByText("R$ 56,00 cada")).toBeVisible();
+});
+
+test("impede modalidade incompatível e não solicita dados pessoais", async ({ page }) => {
+  await page.goto("/cardapio/mesa-viva");
+  await page.getByRole("button", { name: "Adicionar Burrata da casa" }).click();
+  await page.getByRole("button", { name: /Abrir carrinho com 1 itens/ }).click();
+
+  await page.getByRole("radio", { name: /Entrega/ }).click();
+  await expect(page.getByText("Modalidade incompatível com: Burrata da casa.")).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Entrega/ })).not.toBeChecked();
+  await page.getByRole("radio", { name: /Retirada/ }).check();
+  await expect(page.getByText("Cotação demonstrativa para retirada.")).toBeVisible();
+  await expect(page.locator('input:not([type="radio"]):not([placeholder="Buscar pratos..."])')).toHaveCount(0);
+});
+
+test("tenant sem entrega expõe somente modalidades habilitadas", async ({ page }) => {
+  await page.goto("/cardapio/casa-do-porto");
+  await page.getByRole("button", { name: "Adicionar Água de coco" }).click();
+  await page.getByRole("button", { name: /Abrir carrinho com 1 itens/ }).click();
+
+  await expect(page.getByRole("radio", { name: /Mesa/ })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Retirada/ })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Entrega/ })).toHaveCount(0);
+  await expect(page.getByText(/Faltam R\$.*13,00/)).toBeVisible();
 });
