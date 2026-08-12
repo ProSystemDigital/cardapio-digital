@@ -51,3 +51,13 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - A cotação se atualiza a cada mudança nas linhas ou na modalidade.
 - Mesa não solicita número; retirada não solicita identificação; entrega não solicita endereço.
 - Mesmo uma cotação válida não habilita envio, persistência ou confirmação do pedido.
+
+## Fase 1.5 — Rascunho e prévia da mensagem
+
+- O rascunho é criado somente após reconstruir linhas e recalcular a cotação pelo catálogo atual.
+- Preço alterado é atualizado; indisponibilidade, isolamento inválido ou mínimo não atingido bloqueiam a prévia.
+- O resumo contém estabelecimento, modalidade, itens, personalizações, subtotal, taxa e total.
+- A mensagem é determinística e não expõe IDs internos nem solicita dados pessoais.
+- A interface identifica permanentemente “Prévia — pedido não enviado”.
+- Copiar exige ação do usuário e uma falha de clipboard não fecha nem apaga a prévia.
+- Não existe link para WhatsApp, navegação externa, API, webhook ou persistência.

@@ -104,3 +104,50 @@ test("tenant sem entrega expõe somente modalidades habilitadas", async ({ page 
   await expect(page.getByRole("radio", { name: /Entrega/ })).toHaveCount(0);
   await expect(page.getByText(/Faltam R\$.*13,00/)).toBeVisible();
 });
+
+test("gera prévia local, copia com segurança e não navega externamente", async ({ page }) => {
+  await page.goto("/cardapio/mesa-viva");
+  await page.getByRole("button", { name: "Personalizar Burger Mesa Viva" }).click();
+  await page.getByRole("checkbox", { name: /Bacon/ }).check();
+  await page.getByRole("button", { name: "Adicionar ao carrinho" }).click();
+  await page.getByRole("button", { name: /Abrir carrinho com 1 itens/ }).click();
+  await page.getByRole("radio", { name: /Retirada/ }).check();
+
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: async (value: string) => {
+          (window as typeof window & { copiedOrder?: string }).copiedOrder = value;
+        },
+      },
+    });
+  });
+
+  const previewButton = page.getByRole("button", { name: "Revisar prévia" });
+  await previewButton.click();
+  const dialog = page.getByRole("dialog", { name: "Prévia do pedido" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("Prévia — pedido não enviado", { exact: true })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Fechar prévia" })).toBeFocused();
+  await expect(dialog.getByText(/Burger Mesa Viva/)).toBeVisible();
+  await expect(dialog.getByText(/Total: R\$ 50,00/)).toBeVisible();
+  await dialog.getByRole("button", { name: "Copiar resumo" }).click();
+  await expect(dialog.getByText("Resumo copiado.")).toBeVisible();
+  expect(await page.evaluate(() => (window as typeof window & { copiedOrder?: string }).copiedOrder)).toContain("PEDIDO NÃO ENVIADO");
+  await expect(page.locator('a[href^="http"], a[href^="https"], a[href*="wa.me"]')).toHaveCount(0);
+
+  await page.keyboard.press("Escape");
+  await expect(previewButton).toBeFocused();
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async () => { throw new Error("clipboard bloqueado"); } },
+    });
+  });
+  await previewButton.click();
+  const errorDialog = page.getByRole("dialog", { name: "Prévia do pedido" });
+  await errorDialog.getByRole("button", { name: "Copiar resumo" }).click();
+  await expect(errorDialog.getByText("Não foi possível copiar. A prévia continua disponível.")).toBeVisible();
+  await expect(errorDialog.getByText(/Burger Mesa Viva/)).toBeVisible();
+});

@@ -18,7 +18,9 @@ import {
   type ProductSelection,
 } from "../../../domain/order-cart";
 import { calculateOrderQuote } from "../../../domain/order-quote";
+import { buildOrderDraft, type OrderDraft } from "../../../domain/order-draft";
 import FulfillmentSelector from "../FulfillmentSelector/FulfillmentSelector";
+import OrderPreview from "../OrderPreview/OrderPreview";
 import ProductCustomizer from "../ProductCustomizer/ProductCustomizer";
 import styles from "./MenuExperience.module.scss";
 
@@ -45,6 +47,8 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
   const [cartError, setCartError] = useState("");
   const [fulfillmentMode, setFulfillmentMode] = useState<FulfillmentMode | null>(null);
   const [fulfillmentError, setFulfillmentError] = useState("");
+  const [orderDraft, setOrderDraft] = useState<OrderDraft | null>(null);
+  const [previewError, setPreviewError] = useState("");
 
   const visibleProducts = useMemo(
     () => filterProducts(products, category, query),
@@ -114,6 +118,23 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
     setFulfillmentError("");
   };
 
+  const openOrderPreview = () => {
+    const result = buildOrderDraft(
+      catalog,
+      lines,
+      fulfillmentMode,
+      crypto.randomUUID(),
+    );
+    if (!result.ok) {
+      setPreviewError(result.errors.join(" "));
+      return;
+    }
+    setPreviewError("");
+    setOrderDraft(result.draft);
+  };
+
+  const closeOrderPreview = useCallback(() => setOrderDraft(null), []);
+
   return (
     <main>
       <header className={styles.header}>
@@ -179,12 +200,14 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
           <div className={styles.total}><span>Total</span><strong>{formatPrice(quote.totalInCents)}</strong></div>
           {quote.missingMinimumInCents > 0 && lines.length > 0 ? <p className={styles.minimumWarning}>Faltam {formatPrice(quote.missingMinimumInCents)} para o pedido mínimo.</p> : null}
           {!fulfillmentMode ? <small>Selecione mesa, retirada ou entrega para calcular a cotação.</small> : <small>Cotação demonstrativa para {fulfillmentLabels[fulfillmentMode]}. Nenhum pedido foi enviado.</small>}
-          <button disabled aria-describedby="order-status">Pedidos em breve</button>
-          <span id="order-status" className={styles.srOnly}>{quote.canContinue ? "Cotação válida, envio ainda indisponível." : quote.errors.join(" ")}</span>
+          {previewError ? <p className={styles.cartError} role="alert">{previewError}</p> : null}
+          <button disabled={!quote.canContinue} onClick={openOrderPreview} aria-describedby="order-status">Revisar prévia</button>
+          <span id="order-status" className={styles.srOnly}>{quote.canContinue ? "Cotação válida para gerar prévia local. Nenhum pedido será enviado." : quote.errors.join(" ")}</span>
         </div>
       </aside>
 
       {customization ? <ProductCustomizer product={customization.product} initialSelection={customization.line} formatPrice={formatPrice} onCancel={closeCustomizer} onConfirm={(selection) => commitSelection(selection, customization.line)} /> : null}
+      {orderDraft ? <OrderPreview draft={orderDraft} onClose={closeOrderPreview} /> : null}
     </main>
   );
 }

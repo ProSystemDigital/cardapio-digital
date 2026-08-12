@@ -6,7 +6,8 @@
 | 1. Fundação do domínio | Concluída | Contratos multitenant, resolução por slug, repositório em memória, catálogo externo à UI e testes de isolamento. |
 | 1.2. Modelo operacional | Concluída | Horários, modalidades por produto, variações, adicionais, regras monetárias e validação integral. |
 | 1.3. Personalização do item | Concluída | Modal acessível, carrinho por linhas, edição e preço recalculado pelo catálogo. |
-| 1.4. Modalidade e cotação | Em avaliação | Mesa, retirada, entrega, compatibilidade, mínimo, taxa e total local. |
+| 1.4. Modalidade e cotação | Concluída | Mesa, retirada, entrega, compatibilidade, mínimo, taxa e total local. |
+| 1.5. Rascunho e prévia | Em avaliação | Revalidação, resumo imutável, mensagem determinística e cópia local. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |
@@ -26,12 +27,11 @@
 
 ## Próximas decisões
 
-1. Avaliar visual e funcionalmente a cotação por modalidade.
-2. Modelar o resumo local e a mensagem de WhatsApp sem realizar envio.
-3. Escolher persistência e estratégia de isolamento físico/lógico por tenant.
-4. Definir matriz de permissões e eventos da trilha de auditoria.
-5. Detalhar exceções de horário, áreas e regras de entrega.
-6. Modelar os dados pessoais mínimos por modalidade antes da coleta.
-7. Definir contrato operacional do WhatsApp e critérios de confirmação do pedido.
+1. Avaliar visual e funcionalmente o rascunho e a prévia textual.
+2. Registrar ADR de persistência e isolamento PostgreSQL.
+3. Definir matriz de permissões e eventos da trilha de auditoria.
+4. Detalhar exceções de horário, áreas e regras de entrega.
+5. Modelar os dados pessoais mínimos por modalidade antes da coleta.
+6. Definir contrato operacional do WhatsApp e critérios de confirmação do pedido.
 
 Toda entrega executa testes unitários, lint, tipos, testes responsivos, build e teste PWA conforme aplicabilidade.

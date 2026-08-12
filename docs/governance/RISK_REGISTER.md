@@ -15,5 +15,7 @@
 | CD-11 | Linha ficar desatualizada após mudança do catálogo | P1 | Aberto | Revalidar e recalcular todas as linhas no servidor antes da futura confirmação do pedido. |
 | CD-12 | Modalidade incompatível ou taxa incorreta produzir total enganoso | P1 | Mitigado na cotação local | Rejeitar troca incompatível e derivar mínimo/taxa do tenant; repetir cálculo no servidor no checkout futuro. |
 | CD-13 | Cotação local ser interpretada como pedido confirmado | P1 | Mitigado | Identificar a cotação como demonstrativa e manter envio desabilitado. |
+| CD-14 | Prévia usar preço ou disponibilidade desatualizados | P1 | Mitigado localmente | Reconstruir linhas e recalcular cotação antes da prévia; repetir obrigatoriamente no backend futuro. |
+| CD-15 | Cópia da mensagem ser interpretada como envio ou confirmação | P1 | Parcialmente mitigado | Exibir aviso permanente, não abrir WhatsApp e não declarar confirmação; contrato operacional ainda pendente. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.
