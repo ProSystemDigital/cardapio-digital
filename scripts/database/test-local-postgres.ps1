@@ -15,13 +15,18 @@ $dropdb = Join-Path $PostgresBin "dropdb.exe"
 $repositoryRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $upMigration = Join-Path $repositoryRoot "database\migrations\0001_initial_schema.up.sql"
 $downMigration = Join-Path $repositoryRoot "database\migrations\0001_initial_schema.down.sql"
+$repositoryUpMigration = Join-Path $repositoryRoot "database\migrations\0002_catalog_repository.up.sql"
+$repositoryDownMigration = Join-Path $repositoryRoot "database\migrations\0002_catalog_repository.down.sql"
 $isolationTest = Join-Path $repositoryRoot "database\tests\multitenant-isolation.sql"
+$repositoryFixture = Join-Path $repositoryRoot "database\tests\catalog-repository-fixture.sql"
 
 if (-not $env:PGPASSWORD) {
   $securePassword = Read-Host "Senha local do PostgreSQL" -AsSecureString
   $temporaryCredential = New-Object System.Management.Automation.PSCredential($AdminUser, $securePassword)
   $env:PGPASSWORD = $temporaryCredential.GetNetworkCredential().Password
 }
+$previousPgClientEncoding = $env:PGCLIENTENCODING
+$env:PGCLIENTENCODING = "UTF8"
 
 foreach ($executable in @($psql, $createdb, $dropdb)) {
   if (-not (Test-Path -LiteralPath $executable)) {
@@ -54,14 +59,39 @@ try {
     throw "O papel $runtimeRole já existe. Remova-o conscientemente antes do teste."
   }
 
-  Invoke-PsqlAdmin -Arguments @("-c", "CREATE ROLE $runtimeRole NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;")
+  $runtimePasswordBytes = New-Object byte[] 32
+  $passwordGenerator = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+  try {
+    $passwordGenerator.GetBytes($runtimePasswordBytes)
+  }
+  finally {
+    $passwordGenerator.Dispose()
+  }
+  $runtimePassword = [Convert]::ToBase64String($runtimePasswordBytes)
+  Invoke-PsqlAdmin -Arguments @("-c", "CREATE ROLE $runtimeRole LOGIN PASSWORD '$runtimePassword' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;")
   $createdRole = $true
   & $createdb -w -h $HostName -p $Port -U $AdminUser $testDatabase
   if ($LASTEXITCODE -ne 0) { throw "Falha ao criar o banco descartável." }
   $createdDatabase = $true
 
   Invoke-PsqlTestDatabase -Arguments @("-f", $upMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $isolationTest)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryFixture)
+
+  $encodedRuntimePassword = [Uri]::EscapeDataString($runtimePassword)
+  $env:DATABASE_TEST_URL = "postgresql://${runtimeRole}:${encodedRuntimePassword}@${HostName}:${Port}/${testDatabase}"
+  Push-Location $repositoryRoot
+  try {
+    & npm.cmd run test:database
+    if ($LASTEXITCODE -ne 0) { throw "Teste de integração do repositório falhou." }
+  }
+  finally {
+    Pop-Location
+    Remove-Item Env:\DATABASE_TEST_URL -ErrorAction SilentlyContinue
+  }
+
+  Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $downMigration)
 
   $remainingTables = (& $psql -X -w -At -h $HostName -p $Port -U $AdminUser -d $testDatabase -c "SELECT count(*) FROM pg_tables WHERE schemaname = 'public';")
@@ -70,6 +100,7 @@ try {
   }
 
   Invoke-PsqlTestDatabase -Arguments @("-f", $upMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
   Write-Host "PostgreSQL local validado: up, RLS, isolamento, snapshots, down e novo up."
 }
 finally {
@@ -82,4 +113,14 @@ finally {
   Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
   $temporaryCredential = $null
   $securePassword = $null
+  $runtimePassword = $null
+  $runtimePasswordBytes = $null
+  $passwordGenerator = $null
+  Remove-Item Env:\DATABASE_TEST_URL -ErrorAction SilentlyContinue
+  if ($null -eq $previousPgClientEncoding) {
+    Remove-Item Env:\PGCLIENTENCODING -ErrorAction SilentlyContinue
+  }
+  else {
+    $env:PGCLIENTENCODING = $previousPgClientEncoding
+  }
 }

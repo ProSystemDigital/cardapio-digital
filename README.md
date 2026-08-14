@@ -16,6 +16,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - interface responsiva, acessível e instalável como PWA;
 - fallback offline para indisponibilidade de navegação.
 - especificação revisável de PostgreSQL com isolamento multitenant e rollback, ainda sem banco conectado.
+- adaptador PostgreSQL de leitura selecionável no servidor, com memória como padrão seguro.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -24,6 +25,7 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `domain/`: contratos e regras independentes de interface e infraestrutura;
 - `data/`: configuração demonstrativa substituível por fonte persistida futura;
 - `data/catalog-repository.ts`: contrato e implementação temporária em memória;
+- `data/postgres-catalog-repository.ts`: implementação PostgreSQL somente de servidor;
 - `app/`: apresentação Next.js e estado efêmero da experiência;
 - `database/migrations/`: esquema SQL transacional e reversível, ainda não executado;
 - `tests/unit/`: invariantes de tenant, catálogo, carrinho e estrutura persistente;
@@ -70,6 +72,8 @@ npm run test:pwa:existing-build
 Variáveis futuras devem ser documentadas em `.env.example` somente com placeholders. Arquivos `.env*`, credenciais e vínculos locais de hospedagem permanecem ignorados.
 
 A validação PostgreSQL usa um banco local descartável e o executor documentado em `docs/operations/DATABASE_MIGRATIONS.md`. pgAdmin 4 é a interface administrativa escolhida; Neon permanece apenas como provedor remoto planejado, sem conexão nesta fase.
+
+Sem variáveis, a aplicação continua usando o catálogo em memória. A seleção PostgreSQL exige `CATALOG_REPOSITORY=postgres` e `DATABASE_URL` somente no ambiente do servidor. Nunca versione a URL real.
 
 ## Governança
 

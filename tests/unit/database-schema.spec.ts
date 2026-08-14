@@ -13,6 +13,8 @@ const localRunner = readFileSync(
   resolve(process.cwd(), "scripts", "database", "test-local-postgres.ps1"),
   "utf8",
 );
+const secondUp = readFileSync(resolve(migrationsDirectory, "0002_catalog_repository.up.sql"), "utf8");
+const secondDown = readFileSync(resolve(migrationsDirectory, "0002_catalog_repository.down.sql"), "utf8");
 
 const tenantTables = [
   "tenants",
@@ -39,6 +41,16 @@ test("migration inicial e rollback são transacionais e simétricos", () => {
     expect(up).toContain(`CREATE TABLE ${table} (`);
     expect(down).toContain(`DROP TABLE IF EXISTS ${table};`);
   }
+});
+
+test("migration do repositório é transacional e reversível", () => {
+  expect(secondUp.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(secondDown.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(secondUp).toContain("ADD COLUMN emoji");
+  expect(secondUp).toContain("CREATE FUNCTION public.resolve_public_tenant_id");
+  expect(secondUp).toContain("CREATE FUNCTION public.list_public_tenant_slugs");
+  expect(secondDown).toContain("DROP FUNCTION IF EXISTS public.resolve_public_tenant_id");
+  expect(secondDown).toContain("DROP COLUMN IF EXISTS emoji");
 });
 
 test("todas as tabelas negam acesso sem contexto de tenant", () => {
@@ -96,9 +108,13 @@ test("esquema não antecipa dados pessoais", () => {
 test("gate local usa recursos descartáveis e papel sem bypass de RLS", () => {
   expect(localRunner).toContain('$testDatabase = "cardapio_digital_test"');
   expect(localRunner).toContain('$runtimeRole = "cardapio_runtime_test"');
+  expect(localRunner).toContain("LOGIN PASSWORD");
   expect(localRunner).toContain("NOSUPERUSER");
   expect(localRunner).toContain("NOBYPASSRLS");
   expect(localRunner).toContain("Remove-Item Env:\\PGPASSWORD");
+  expect(localRunner).toContain("Remove-Item Env:\\DATABASE_TEST_URL");
+  expect(localRunner).toContain('$env:PGCLIENTENCODING = "UTF8"');
+  expect(localRunner).toContain("Remove-Item Env:\\PGCLIENTENCODING");
   expect(localRunner).toContain("--if-exists --force");
 });
 

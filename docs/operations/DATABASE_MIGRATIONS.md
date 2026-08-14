@@ -35,14 +35,19 @@ Execute o gate; o prompt seguro mantém a senha somente na memória do processo:
 O script:
 
 1. recusa continuar se o banco ou o papel fixo de teste já existirem;
-2. cria um papel sem login, sem superusuário e sem `BYPASSRLS`;
+2. cria um papel de login descartável, com senha aleatória, sem superusuário e sem `BYPASSRLS`;
 3. cria somente `cardapio_digital_test`;
-4. executa migration `up`, testes reais de RLS e snapshots e migration `down`;
+4. executa migrations `up`, testes reais de RLS, snapshots e repositório e migrations `down`;
 5. confirma ausência de tabelas e executa um segundo `up`;
-6. remove o banco, o papel, `PGPASSWORD` e as referências temporárias no bloco de limpeza.
+6. força UTF-8 apenas no cliente `psql` durante o gate e restaura a configuração anterior ao final;
+7. remove o banco, o papel, `PGPASSWORD`, `DATABASE_TEST_URL` e as referências temporárias no bloco de limpeza.
 
 Não copie a senha para `.env`, histórico, argumento de linha de comando ou pgAdmin salvo. O Neon permanece desconectado até um gate posterior de provisionamento e segredos.
 
 ## Evidência da execução local
 
 Em 2026-08-12, o gate foi executado com sucesso no PostgreSQL 18 local. A saída final confirmou `up`, negação RLS sem contexto, isolamento entre dois tenants, bloqueio de referência cruzada, preservação de snapshots, `down` sem tabelas residuais e novo `up`. O `DROP ROLE` subsequente confirmou a limpeza do papel descartável. Nenhuma senha foi registrada no repositório ou fornecida ao agente.
+
+Na Fase 2.2, o executor foi ampliado para aplicar a migration do adaptador, gerar credencial aleatória exclusiva para o papel de runtime, carregar uma fixture fictícia e executar `npm run test:database`. A nova evidência ainda deve ser produzida pelo mesmo prompt seguro antes da aprovação da fase.
+
+O gate ampliado foi executado com sucesso em 2026-08-12. A mensagem final confirmou migrations 0001/0002, teste real do `PostgresCatalogRepository`, RLS, isolamento, snapshots, rollback e novo `up`; o `DROP ROLE` confirmou a limpeza do papel de runtime. Banco, fixture, URL e credenciais eram descartáveis e não foram retidos.

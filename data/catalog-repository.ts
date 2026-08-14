@@ -1,6 +1,5 @@
 import type { TenantCatalog } from "../domain/catalog";
 import { validateCatalog } from "../domain/catalog-validation";
-import { demoCatalogs } from "./demo-catalogs";
 
 export interface CatalogRepository {
   findByTenantSlug(slug: string): Promise<TenantCatalog | null>;
@@ -37,6 +36,3 @@ export class InMemoryCatalogRepository implements CatalogRepository {
     return [...this.#catalogsBySlug.keys()];
   }
 }
-
-export const catalogRepository: CatalogRepository =
-  new InMemoryCatalogRepository(demoCatalogs);

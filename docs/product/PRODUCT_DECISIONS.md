@@ -78,3 +78,12 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - PostgreSQL 18 local hospeda somente o banco descartável de validação.
 - Neon Postgres Console é a escolha para o futuro ambiente remoto, ainda sem conexão ou credencial.
 - O gate deve comprovar negação sem tenant, isolamento entre dois tenants, bloqueio de referências cruzadas, snapshots e `up/down/up`.
+
+## Fase 2.2 — Repositório PostgreSQL de catálogo
+
+- A interface continua dependendo do contrato `CatalogRepository`, não do driver ou de SQL.
+- Memória permanece a fonte padrão; PostgreSQL exige seleção e URL explícitas no servidor.
+- Configuração PostgreSQL inválida não pode cair silenciosamente no catálogo demonstrativo.
+- Toda leitura persistida ocorre em transação somente leitura e com contexto local de tenant.
+- O agregado reconstruído passa pelas mesmas validações do catálogo em memória.
+- Fixture e banco são locais, fictícios e descartáveis; Neon e escrita administrativa continuam adiados.

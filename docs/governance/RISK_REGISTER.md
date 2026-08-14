@@ -21,5 +21,7 @@
 | CD-17 | Migration irreversível causar perda ou indisponibilidade | P0 | Parcialmente mitigado | O ciclo transacional `up/down/up` foi comprovado sem tabelas residuais; backup e restauração continuam obrigatórios antes do primeiro ambiente persistente. |
 | CD-18 | Runtime privilegiado contornar RLS | P0 | Mitigado no gate local | Papel descartável foi criado sem login, superusuário ou `BYPASSRLS`; reproduzir papéis separados no futuro provisionamento. |
 | CD-19 | Credencial administrativa local vazar em arquivo, argumento ou histórico | P0 | Mitigado no gate local | Senha foi solicitada de forma oculta, mantida somente na sessão e removida no `finally`; Neon permanece desconectado. |
+| CD-20 | Falha no PostgreSQL servir silenciosamente catálogo demonstrativo incorreto | P1 | Mitigado por desenho | Memória é padrão explícito; seleção PostgreSQL incompleta ou falha de consulta lança erro e não aciona fallback implícito. |
+| CD-21 | Descoberta por slug contornar isolamento e expor catálogo | P0 | Mitigado localmente | Funções retornam apenas UUID/slugs públicos; leitura integral com tenant foi comprovada usando papel sem `BYPASSRLS`. Repetir no ambiente provisionado. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

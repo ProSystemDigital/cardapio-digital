@@ -15,3 +15,5 @@ O envio por WhatsApp e as modalidades de retirada/entrega permanecem bloqueados 
 ## Esquema persistente em avaliação
 
 A migration local especifica tenants, identidade visual, operação, horários, catálogo e snapshots de itens de pedido. Esses artefatos ainda não foram executados e não representam coleta ou armazenamento. O esquema exclui deliberadamente nome e contato do cliente, endereço, número de mesa, dados de pagamento e identificadores governamentais. A inclusão de qualquer desses campos exige atualização prévia deste inventário e decisão de privacidade, finalidade, retenção e acesso.
+
+O teste do repositório PostgreSQL acrescenta uma fixture local fictícia com tenant, horário, categoria, produto, variação e adicional. O banco é descartado ao final do gate. Não há dado pessoal, conexão Neon ou retenção do conteúdo de teste.

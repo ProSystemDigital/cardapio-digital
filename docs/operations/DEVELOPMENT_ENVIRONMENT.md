@@ -24,6 +24,10 @@ de manter duas instancias, investigue o processo que ocupa a porta preferencial.
 As portas `3100` e `3200` sao isoladas para as suites Playwright visual e PWA.
 Elas nao alteram a porta padrao do ambiente de desenvolvimento.
 
+A suíte visual usa `next start` sobre um build de produção para evitar recompilações sob demanda e tornar o tempo do gate previsível. `npm run test:visual` produz o build antes dos testes; CI e validações que já executaram `npm run build` usam `npm run test:visual:existing-build`.
+
+Em 2026-08-14, essa configuração substituiu o servidor `next dev` após evidência de que a compilação sob demanda fazia a suíte sequencial ultrapassar o limite do executor. Com o build existente, 27 testes visuais concluíram em 58 segundos e o gate PWA concluiu em 7,1 segundos.
+
 ## Diagnostico no Windows
 
 Identifique primeiro o PID que esta ouvindo na porta `3000` e confirme sua

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MenuExperience from "../../components/MenuExperience/MenuExperience";
-import { catalogRepository } from "../../../data/catalog-repository";
+import { catalogRepository } from "../../../data/catalog-repository.server";
 
 type TenantMenuPageProps = {
   params: Promise<{ tenantSlug: string }>;
