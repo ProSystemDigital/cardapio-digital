@@ -17,6 +17,8 @@ $upMigration = Join-Path $repositoryRoot "database\migrations\0001_initial_schem
 $downMigration = Join-Path $repositoryRoot "database\migrations\0001_initial_schema.down.sql"
 $repositoryUpMigration = Join-Path $repositoryRoot "database\migrations\0002_catalog_repository.up.sql"
 $repositoryDownMigration = Join-Path $repositoryRoot "database\migrations\0002_catalog_repository.down.sql"
+$writesUpMigration = Join-Path $repositoryRoot "database\migrations\0003_catalog_writes.up.sql"
+$writesDownMigration = Join-Path $repositoryRoot "database\migrations\0003_catalog_writes.down.sql"
 $isolationTest = Join-Path $repositoryRoot "database\tests\multitenant-isolation.sql"
 $repositoryFixture = Join-Path $repositoryRoot "database\tests\catalog-repository-fixture.sql"
 
@@ -76,6 +78,7 @@ try {
 
   Invoke-PsqlTestDatabase -Arguments @("-f", $upMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $isolationTest)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryFixture)
 
@@ -91,6 +94,7 @@ try {
     Remove-Item Env:\DATABASE_TEST_URL -ErrorAction SilentlyContinue
   }
 
+  Invoke-PsqlTestDatabase -Arguments @("-f", $writesDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $downMigration)
 
@@ -101,6 +105,7 @@ try {
 
   Invoke-PsqlTestDatabase -Arguments @("-f", $upMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
   Write-Host "PostgreSQL local validado: up, RLS, isolamento, snapshots, down e novo up."
 }
 finally {

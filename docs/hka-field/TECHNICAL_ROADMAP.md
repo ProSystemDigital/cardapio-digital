@@ -11,6 +11,7 @@
 | 2.0. Fundação da persistência | Concluída | ADR PostgreSQL, esquema relacional, isolamento RLS e rollback, ainda sem banco provisionado. |
 | 2.1. Validação PostgreSQL local | Concluída | Papéis mínimos, RLS, isolamento, snapshots, limpeza e ciclo `up/down/up` comprovados. |
 | 2.2. Repositório PostgreSQL | Concluída | Adaptador real validado localmente atrás do contrato atual, com configuração explícita e retorno seguro à memória. |
+| 2.3. Escrita transacional do catálogo | Em avaliação | Gate real aprovado: preço e disponibilidade com ator autorizado, versão otimista e auditoria append-only. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |
@@ -30,9 +31,9 @@
 
 ## Próximas decisões
 
-1. Avaliar o adaptador PostgreSQL e a evidência do gate local ampliado.
-2. Definir operações de escrita do catálogo e sua fronteira transacional antes de autenticação ou painel.
-3. Definir matriz de permissões e eventos da trilha de auditoria.
+1. Avaliar a implementação e a evidência do gate PostgreSQL da Fase 2.3.
+2. Expandir a matriz de permissões antes de autenticação ou painel.
+3. Definir retenção e consulta operacional da trilha de auditoria.
 4. Detalhar exceções de horário, áreas e regras de entrega.
 5. Modelar os dados pessoais mínimos por modalidade antes da coleta.
 6. Definir contrato operacional do WhatsApp e critérios de confirmação do pedido.

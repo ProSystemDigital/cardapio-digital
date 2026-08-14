@@ -2,6 +2,7 @@
 
 GRANT USAGE ON SCHEMA public TO cardapio_runtime_test;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO cardapio_runtime_test;
+REVOKE UPDATE, DELETE ON catalog_audit_events FROM cardapio_runtime_test;
 
 INSERT INTO tenants (id, slug, display_name, short_name, tagline, order_channel, payment_timing)
 VALUES

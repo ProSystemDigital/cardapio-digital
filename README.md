@@ -17,6 +17,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - fallback offline para indisponibilidade de navegação.
 - especificação revisável de PostgreSQL com isolamento multitenant e rollback, ainda sem banco conectado.
 - adaptador PostgreSQL de leitura selecionável no servidor, com memória como padrão seguro.
+- serviço interno de escrita para preço e disponibilidade, com autorização, versão e auditoria atômica.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -26,12 +27,15 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `data/`: configuração demonstrativa substituível por fonte persistida futura;
 - `data/catalog-repository.ts`: contrato e implementação temporária em memória;
 - `data/postgres-catalog-repository.ts`: implementação PostgreSQL somente de servidor;
+- `application/catalog-administration-service.ts`: autorização e validação dos comandos internos;
+- `data/postgres-catalog-command-repository.ts`: escrita transacional PostgreSQL;
 - `app/`: apresentação Next.js e estado efêmero da experiência;
 - `database/migrations/`: esquema SQL transacional e reversível, ainda não executado;
 - `tests/unit/`: invariantes de tenant, catálogo, carrinho e estrutura persistente;
 - `tests/visual/` e `tests/pwa/`: comportamento no navegador e operação offline.
 
-Banco provisionado ou conectado, autenticação, autorização, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
+Banco remoto provisionado, autenticação, autorização externa, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
+Não existe superfície externa para os comandos administrativos: autenticação, painel e API continuam fora desta fase.
 
 Variações e adicionais podem ser selecionados em uma caixa de diálogo acessível. Antes da prévia, todas as linhas e valores são reconstruídos pelo catálogo atual. A mensagem pode ser copiada localmente, mas não abre WhatsApp, não solicita dados pessoais e não envia ou confirma um pedido.
 

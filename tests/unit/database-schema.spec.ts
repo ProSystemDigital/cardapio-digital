@@ -15,6 +15,8 @@ const localRunner = readFileSync(
 );
 const secondUp = readFileSync(resolve(migrationsDirectory, "0002_catalog_repository.up.sql"), "utf8");
 const secondDown = readFileSync(resolve(migrationsDirectory, "0002_catalog_repository.down.sql"), "utf8");
+const writesUp = readFileSync(resolve(migrationsDirectory, "0003_catalog_writes.up.sql"), "utf8");
+const writesDown = readFileSync(resolve(migrationsDirectory, "0003_catalog_writes.down.sql"), "utf8");
 
 const tenantTables = [
   "tenants",
@@ -51,6 +53,20 @@ test("migration do repositório é transacional e reversível", () => {
   expect(secondUp).toContain("CREATE FUNCTION public.list_public_tenant_slugs");
   expect(secondDown).toContain("DROP FUNCTION IF EXISTS public.resolve_public_tenant_id");
   expect(secondDown).toContain("DROP COLUMN IF EXISTS emoji");
+});
+
+test("migration de escrita versiona produto e protege auditoria por RLS", () => {
+  expect(writesUp.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(writesDown.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(writesUp).toContain("ADD COLUMN version bigint NOT NULL DEFAULT 1");
+  expect(writesUp).toContain("CREATE TABLE catalog_audit_events");
+  expect(writesUp).toContain("catalog_audit_events ENABLE ROW LEVEL SECURITY");
+  expect(writesUp).toContain("catalog_audit_events FORCE ROW LEVEL SECURITY");
+  expect(writesUp).toContain("catalog_audit_events_select");
+  expect(writesUp).toContain("catalog_audit_events_insert");
+  expect(writesUp).not.toContain("catalog_audit_events_tenant_isolation");
+  expect(writesUp).toContain("FOREIGN KEY (tenant_id, entity_id)");
+  expect(writesDown).toContain("DROP TABLE IF EXISTS catalog_audit_events");
 });
 
 test("todas as tabelas negam acesso sem contexto de tenant", () => {

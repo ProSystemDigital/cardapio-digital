@@ -51,3 +51,7 @@ Em 2026-08-12, o gate foi executado com sucesso no PostgreSQL 18 local. A saída
 Na Fase 2.2, o executor foi ampliado para aplicar a migration do adaptador, gerar credencial aleatória exclusiva para o papel de runtime, carregar uma fixture fictícia e executar `npm run test:database`. A nova evidência ainda deve ser produzida pelo mesmo prompt seguro antes da aprovação da fase.
 
 O gate ampliado foi executado com sucesso em 2026-08-12. A mensagem final confirmou migrations 0001/0002, teste real do `PostgresCatalogRepository`, RLS, isolamento, snapshots, rollback e novo `up`; o `DROP ROLE` confirmou a limpeza do papel de runtime. Banco, fixture, URL e credenciais eram descartáveis e não foram retidos.
+
+Na Fase 2.3, o gate também aplica a migration 0003 e testa alteração autorizada, incremento de versão, conflito otimista e evento de auditoria na mesma transação. Essa ampliação requer nova execução humana antes da aprovação da fase.
+
+O gate da Fase 2.3 foi executado com sucesso em 2026-08-14. A conclusão confirmou escrita do produto, incremento de versão, rejeição do comando obsoleto, um único evento de auditoria, migrations `down/up` e limpeza do papel descartável por `DROP ROLE`. Nenhuma credencial ou fixture foi retida.

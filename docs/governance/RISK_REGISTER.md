@@ -23,5 +23,8 @@
 | CD-19 | Credencial administrativa local vazar em arquivo, argumento ou histórico | P0 | Mitigado no gate local | Senha foi solicitada de forma oculta, mantida somente na sessão e removida no `finally`; Neon permanece desconectado. |
 | CD-20 | Falha no PostgreSQL servir silenciosamente catálogo demonstrativo incorreto | P1 | Mitigado por desenho | Memória é padrão explícito; seleção PostgreSQL incompleta ou falha de consulta lança erro e não aciona fallback implícito. |
 | CD-21 | Descoberta por slug contornar isolamento e expor catálogo | P0 | Mitigado localmente | Funções retornam apenas UUID/slugs públicos; leitura integral com tenant foi comprovada usando papel sem `BYPASSRLS`. Repetir no ambiente provisionado. |
+| CD-22 | Escrita concorrente sobrescrever preço ou disponibilidade | P1 | Mitigado localmente | `expectedVersion`, incremento atômico e rejeição de comando obsoleto foram comprovados no PostgreSQL local. |
+| CD-23 | Mutação ocorrer sem evidência ou auditoria ser adulterada | P0 | Mitigado localmente | Produto e evento foram persistidos na mesma transação; runtime possui somente leitura e inserção na trilha. Repetir no ambiente provisionado. |
+| CD-24 | Contexto de ator forjado conceder escrita indevida | P0 | Bloqueado externamente | Não expor comandos por HTTP/UI; futura autenticação deve construir ator e tenants exclusivamente no servidor. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

@@ -87,3 +87,12 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - Toda leitura persistida ocorre em transação somente leitura e com contexto local de tenant.
 - O agregado reconstruído passa pelas mesmas validações do catálogo em memória.
 - Fixture e banco são locais, fictícios e descartáveis; Neon e escrita administrativa continuam adiados.
+
+## Fase 2.3 — Escrita transacional do catálogo
+
+- Proprietário e gerente vinculados ao tenant podem alterar preço e disponibilidade pelo serviço interno.
+- Administrador da plataforma não recebe edição implícita de catálogo.
+- Toda mutação exige versão esperada e rejeita sobrescrita concorrente.
+- Alteração e auditoria pertencem à mesma transação.
+- Auditoria do runtime é append-only e protegida por tenant.
+- O ator é apenas contrato técnico; não existe endpoint, autenticação, painel ou dado pessoal nesta fase.
