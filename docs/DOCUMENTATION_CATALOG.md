@@ -18,7 +18,8 @@
 | `docs/architecture/adr/0007-postgresql-e-isolamento-multitenant.md` | Persistência relacional, RLS e referências por tenant | Em avaliação |
 | `docs/architecture/adr/0008-ferramentas-de-persistencia.md` | PostgreSQL local, pgAdmin 4, psql e Neon planejado | Aceito |
 | `docs/architecture/adr/0009-repositorio-postgresql-de-catalogo.md` | Adaptador de leitura, seleção explícita e retorno à memória | Aceito |
-| `docs/architecture/adr/0010-comandos-autorizados-e-auditoria-transacional.md` | Autorização negativa, concorrência e auditoria atômica | Em avaliação |
+| `docs/architecture/adr/0010-comandos-autorizados-e-auditoria-transacional.md` | Autorização negativa, concorrência e auditoria atômica | Aceito |
+| `docs/architecture/adr/0011-identidade-e-autorizacao-derivada.md` | Principal técnico, memberships e permissões derivadas | Aceito |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |
@@ -27,5 +28,6 @@
 | `docs/operations/DATABASE_MIGRATIONS.md` | Imutabilidade, transação e rollback de migrations | Em avaliação |
 | `docs/standards/CODING_STANDARDS.md` | Convenções de código | Em evolução |
 | `docs/standards/SECURITY_POLICY.md` | Segurança institucional | Em evolução |
+| `docs/security/AUTHORIZATION_MODEL.md` | Fronteira de confiança e matriz de permissões | Ativo |
 
 Documentos específicos da aplicação de origem não integram este catálogo nem o novo repositório.

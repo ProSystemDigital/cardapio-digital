@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 | --- | --- |
-| Status | Em avaliação humana |
+| Status | Aceito |
 | Data | 2026-08-14 |
 | Decisores | Produto e Engenharia |
 

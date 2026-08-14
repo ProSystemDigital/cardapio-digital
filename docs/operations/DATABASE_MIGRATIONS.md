@@ -55,3 +55,7 @@ O gate ampliado foi executado com sucesso em 2026-08-12. A mensagem final confir
 Na Fase 2.3, o gate também aplica a migration 0003 e testa alteração autorizada, incremento de versão, conflito otimista e evento de auditoria na mesma transação. Essa ampliação requer nova execução humana antes da aprovação da fase.
 
 O gate da Fase 2.3 foi executado com sucesso em 2026-08-14. A conclusão confirmou escrita do produto, incremento de versão, rejeição do comando obsoleto, um único evento de auditoria, migrations `down/up` e limpeza do papel descartável por `DROP ROLE`. Nenhuma credencial ou fixture foi retida.
+
+Na Fase 3.0, o gate também aplica a migration 0004, carrega principals técnicos fictícios e comprova membership ativa, principal desabilitado e separação do administrador da plataforma. O ciclo de rollback passa a remover 0004 antes das migrations anteriores.
+
+O gate da Fase 3.0 foi executado com sucesso em 2026-08-14. A conclusão confirmou derivação de `owner`, negação para principal desabilitado, separação de `platform_admin`, migrations `down/up` e limpeza do papel descartável por `DROP ROLE`. Nenhuma identidade externa, credencial ou fixture foi retida.

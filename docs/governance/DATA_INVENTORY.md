@@ -19,3 +19,5 @@ A migration local especifica tenants, identidade visual, operação, horários, 
 O teste do repositório PostgreSQL acrescenta uma fixture local fictícia com tenant, horário, categoria, produto, variação e adicional. O banco é descartado ao final do gate. Não há dado pessoal, conexão Neon ou retenção do conteúdo de teste.
 
 A fundação de escrita registra na auditoria UUID técnico do ator, papel, ação, tipo e UUID da entidade, campos operacionais alterados e instante UTC. Não contém identidade civil ou contato. Retenção, acesso operacional e eventual vínculo com conta autenticada permanecem bloqueados até decisão de governança própria.
+
+A Fase 3.0 acrescenta principals, memberships e papéis de plataforma representados somente por UUID, estado, papel, versões e timestamps. Não há subject de fornecedor, nome, e-mail, telefone, senha, token ou cookie. O futuro vínculo com identidade externa exigirá atualização deste inventário antes da coleta.

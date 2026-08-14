@@ -26,5 +26,8 @@
 | CD-22 | Escrita concorrente sobrescrever preço ou disponibilidade | P1 | Mitigado localmente | `expectedVersion`, incremento atômico e rejeição de comando obsoleto foram comprovados no PostgreSQL local. |
 | CD-23 | Mutação ocorrer sem evidência ou auditoria ser adulterada | P0 | Mitigado localmente | Produto e evento foram persistidos na mesma transação; runtime possui somente leitura e inserção na trilha. Repetir no ambiente provisionado. |
 | CD-24 | Contexto de ator forjado conceder escrita indevida | P0 | Bloqueado externamente | Não expor comandos por HTTP/UI; futura autenticação deve construir ator e tenants exclusivamente no servidor. |
+| CD-25 | Papel ou tenant fornecido pelo cliente elevar privilégios | P0 | Mitigado no contrato local | A entrada contém somente `principalId`; membership e papel foram derivados no PostgreSQL antes do comando. Sessão real continua bloqueada até validação do provedor. |
+| CD-26 | Administrador da plataforma obter acesso implícito a tenants | P0 | Mitigado localmente | Papel e matriz separados foram comprovados no gate; suporte futuro exige concessão temporária explícita e auditada. |
+| CD-27 | Membership revogada continuar autorizando ações | P0 | Parcialmente mitigado | Membership/principal são consultados a cada operação e principal desabilitado foi negado; política de sessão será definida com o provedor. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

@@ -11,7 +11,8 @@
 | 2.0. Fundação da persistência | Concluída | ADR PostgreSQL, esquema relacional, isolamento RLS e rollback, ainda sem banco provisionado. |
 | 2.1. Validação PostgreSQL local | Concluída | Papéis mínimos, RLS, isolamento, snapshots, limpeza e ciclo `up/down/up` comprovados. |
 | 2.2. Repositório PostgreSQL | Concluída | Adaptador real validado localmente atrás do contrato atual, com configuração explícita e retorno seguro à memória. |
-| 2.3. Escrita transacional do catálogo | Em avaliação | Gate real aprovado: preço e disponibilidade com ator autorizado, versão otimista e auditoria append-only. |
+| 2.3. Escrita transacional do catálogo | Concluída | Gate real aprovado: preço e disponibilidade com ator autorizado, versão otimista e auditoria append-only. |
+| 3.0. Identidade e autorização | Concluída | Gate real aprovado: principal técnico, memberships por tenant, papel de plataforma separado e matriz negativa por padrão. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |
@@ -31,8 +32,8 @@
 
 ## Próximas decisões
 
-1. Avaliar a implementação e a evidência do gate PostgreSQL da Fase 2.3.
-2. Expandir a matriz de permissões antes de autenticação ou painel.
+1. Decidir o provedor e o vínculo de identidade externa antes de implementar login.
+2. Definir expiração, revogação e recuperação da sessão autenticada.
 3. Definir retenção e consulta operacional da trilha de auditoria.
 4. Detalhar exceções de horário, áreas e regras de entrega.
 5. Modelar os dados pessoais mínimos por modalidade antes da coleta.

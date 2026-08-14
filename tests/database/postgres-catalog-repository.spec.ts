@@ -4,6 +4,8 @@ import { PostgresCatalogRepository } from "../../data/postgres-catalog-repositor
 import { PostgresCatalogCommandRepository } from "../../data/postgres-catalog-command-repository";
 import { CatalogAdministrationService } from "../../application/catalog-administration-service";
 import { CatalogConflictError } from "../../domain/catalog-administration";
+import { PostgresAuthorizationRepository } from "../../data/postgres-authorization-repository";
+import { AuthorizationService, AccessDeniedError } from "../../application/authorization-service";
 
 const databaseUrl = process.env.DATABASE_TEST_URL;
 if (!databaseUrl) throw new Error("DATABASE_TEST_URL é obrigatória no teste PostgreSQL.");
@@ -33,6 +35,36 @@ test("reconstrói catálogo persistido pelo contrato atual", async () => {
       variations: [{ name: "Grande", priceDeltaInCents: 500 }],
       addonGroups: [{ name: "Extras", addons: [{ name: "Extra local", priceInCents: 300 }] }],
     });
+  } finally {
+    await pool.end();
+  }
+});
+
+test("deriva memberships ativas e separa papel de plataforma", async () => {
+  const pool = new Pool({ connectionString: databaseUrl, max: 1 });
+  try {
+    const service = new AuthorizationService(new PostgresAuthorizationRepository(pool));
+    await expect(service.authorizeTenant(
+      { principalId: "41000000-0000-4000-8000-000000000001" },
+      "30000000-0000-0000-0000-000000000003",
+      "tenant.memberships.manage",
+    )).resolves.toMatchObject({ role: "owner" });
+
+    await expect(service.authorizeTenant(
+      { principalId: "43000000-0000-4000-8000-000000000003" },
+      "30000000-0000-0000-0000-000000000003",
+      "catalog.product.update",
+    )).rejects.toBeInstanceOf(AccessDeniedError);
+
+    await expect(service.authorizePlatform(
+      { principalId: "42000000-0000-4000-8000-000000000002" },
+      "platform.tenants.read",
+    )).resolves.toMatchObject({ role: "platform_admin" });
+    await expect(service.authorizeTenant(
+      { principalId: "42000000-0000-4000-8000-000000000002" },
+      "30000000-0000-0000-0000-000000000003",
+      "catalog.product.update",
+    )).rejects.toBeInstanceOf(AccessDeniedError);
   } finally {
     await pool.end();
   }

@@ -17,6 +17,8 @@ const secondUp = readFileSync(resolve(migrationsDirectory, "0002_catalog_reposit
 const secondDown = readFileSync(resolve(migrationsDirectory, "0002_catalog_repository.down.sql"), "utf8");
 const writesUp = readFileSync(resolve(migrationsDirectory, "0003_catalog_writes.up.sql"), "utf8");
 const writesDown = readFileSync(resolve(migrationsDirectory, "0003_catalog_writes.down.sql"), "utf8");
+const authorizationUp = readFileSync(resolve(migrationsDirectory, "0004_identity_authorization.up.sql"), "utf8");
+const authorizationDown = readFileSync(resolve(migrationsDirectory, "0004_identity_authorization.down.sql"), "utf8");
 
 const tenantTables = [
   "tenants",
@@ -67,6 +69,19 @@ test("migration de escrita versiona produto e protege auditoria por RLS", () => 
   expect(writesUp).not.toContain("catalog_audit_events_tenant_isolation");
   expect(writesUp).toContain("FOREIGN KEY (tenant_id, entity_id)");
   expect(writesDown).toContain("DROP TABLE IF EXISTS catalog_audit_events");
+});
+
+test("identidade separa memberships e papéis de plataforma sem PII", () => {
+  expect(authorizationUp.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(authorizationDown.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(authorizationUp).toContain("CREATE TABLE principals");
+  expect(authorizationUp).toContain("CREATE TABLE tenant_memberships");
+  expect(authorizationUp).toContain("CREATE TABLE platform_role_assignments");
+  expect(authorizationUp).toContain("CREATE TABLE access_audit_events");
+  expect(authorizationUp).toContain("tenant_memberships_select_self");
+  expect(authorizationUp).toContain("platform_role_assignments_select_self");
+  expect(authorizationUp).not.toMatch(/\b(email|phone|display_name|password|address)\b/i);
+  expect(authorizationDown).toContain("DROP TABLE IF EXISTS principals");
 });
 
 test("todas as tabelas negam acesso sem contexto de tenant", () => {

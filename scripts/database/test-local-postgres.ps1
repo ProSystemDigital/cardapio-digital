@@ -19,8 +19,11 @@ $repositoryUpMigration = Join-Path $repositoryRoot "database\migrations\0002_cat
 $repositoryDownMigration = Join-Path $repositoryRoot "database\migrations\0002_catalog_repository.down.sql"
 $writesUpMigration = Join-Path $repositoryRoot "database\migrations\0003_catalog_writes.up.sql"
 $writesDownMigration = Join-Path $repositoryRoot "database\migrations\0003_catalog_writes.down.sql"
+$authorizationUpMigration = Join-Path $repositoryRoot "database\migrations\0004_identity_authorization.up.sql"
+$authorizationDownMigration = Join-Path $repositoryRoot "database\migrations\0004_identity_authorization.down.sql"
 $isolationTest = Join-Path $repositoryRoot "database\tests\multitenant-isolation.sql"
 $repositoryFixture = Join-Path $repositoryRoot "database\tests\catalog-repository-fixture.sql"
+$authorizationFixture = Join-Path $repositoryRoot "database\tests\authorization-fixture.sql"
 
 if (-not $env:PGPASSWORD) {
   $securePassword = Read-Host "Senha local do PostgreSQL" -AsSecureString
@@ -79,8 +82,10 @@ try {
   Invoke-PsqlTestDatabase -Arguments @("-f", $upMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $isolationTest)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryFixture)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationFixture)
 
   $encodedRuntimePassword = [Uri]::EscapeDataString($runtimePassword)
   $env:DATABASE_TEST_URL = "postgresql://${runtimeRole}:${encodedRuntimePassword}@${HostName}:${Port}/${testDatabase}"
@@ -94,6 +99,7 @@ try {
     Remove-Item Env:\DATABASE_TEST_URL -ErrorAction SilentlyContinue
   }
 
+  Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $downMigration)
@@ -106,6 +112,7 @@ try {
   Invoke-PsqlTestDatabase -Arguments @("-f", $upMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationUpMigration)
   Write-Host "PostgreSQL local validado: up, RLS, isolamento, snapshots, down e novo up."
 }
 finally {

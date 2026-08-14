@@ -18,6 +18,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - especificação revisável de PostgreSQL com isolamento multitenant e rollback, ainda sem banco conectado.
 - adaptador PostgreSQL de leitura selecionável no servidor, com memória como padrão seguro.
 - serviço interno de escrita para preço e disponibilidade, com autorização, versão e auditoria atômica.
+- autorização derivada de principal e membership persistida, ainda sem login ou fornecedor.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -28,6 +29,8 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `data/catalog-repository.ts`: contrato e implementação temporária em memória;
 - `data/postgres-catalog-repository.ts`: implementação PostgreSQL somente de servidor;
 - `application/catalog-administration-service.ts`: autorização e validação dos comandos internos;
+- `application/authorization-service.ts`: matriz e derivação de acesso por principal;
+- `application/authorized-catalog-administration-service.ts`: composição segura entre identidade e escrita;
 - `data/postgres-catalog-command-repository.ts`: escrita transacional PostgreSQL;
 - `app/`: apresentação Next.js e estado efêmero da experiência;
 - `database/migrations/`: esquema SQL transacional e reversível, ainda não executado;

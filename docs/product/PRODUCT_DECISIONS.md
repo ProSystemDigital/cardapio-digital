@@ -96,3 +96,12 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - Alteração e auditoria pertencem à mesma transação.
 - Auditoria do runtime é append-only e protegida por tenant.
 - O ator é apenas contrato técnico; não existe endpoint, autenticação, painel ou dado pessoal nesta fase.
+
+## Fase 3.0 — Identidade e autorização derivada
+
+- A identidade confiável fornece somente UUID técnico de principal.
+- Papel e tenants são sempre derivados de dados persistidos pelo servidor.
+- Proprietário, gerente e administrador da plataforma possuem matrizes separadas.
+- Administrador da plataforma não acessa automaticamente qualquer tenant.
+- Principal desabilitado ou membership revogada perde autorização.
+- Nenhum fornecedor, login, sessão, convite, endpoint ou dado pessoal é introduzido.
