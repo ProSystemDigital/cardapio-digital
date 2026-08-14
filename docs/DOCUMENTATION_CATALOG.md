@@ -20,6 +20,8 @@
 | `docs/architecture/adr/0009-repositorio-postgresql-de-catalogo.md` | Adaptador de leitura, seleção explícita e retorno à memória | Aceito |
 | `docs/architecture/adr/0010-comandos-autorizados-e-auditoria-transacional.md` | Autorização negativa, concorrência e auditoria atômica | Aceito |
 | `docs/architecture/adr/0011-identidade-e-autorizacao-derivada.md` | Principal técnico, memberships e permissões derivadas | Aceito |
+| `docs/architecture/adr/0012-fronteira-de-autenticacao-e-vinculo-externo.md` | Sessão verificada e vínculo externo portável | Aceito |
+| `docs/architecture/adr/0013-clerk-como-provedor-de-autenticacao.md` | Clerk, governança e estratégia de saída | Aceito com gates |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |
@@ -29,5 +31,7 @@
 | `docs/standards/CODING_STANDARDS.md` | Convenções de código | Em evolução |
 | `docs/standards/SECURITY_POLICY.md` | Segurança institucional | Em evolução |
 | `docs/security/AUTHORIZATION_MODEL.md` | Fronteira de confiança e matriz de permissões | Ativo |
+| `docs/security/AUTHENTICATION_FOUNDATION.md` | Contrato portável de autenticação | Ativo |
+| `docs/security/CLERK_GOVERNANCE.md` | Limites operacionais, privacidade e custo do Clerk | Ativo |
 
 Documentos específicos da aplicação de origem não integram este catálogo nem o novo repositório.

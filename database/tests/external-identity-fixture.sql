@@ -1,0 +1,23 @@
+INSERT INTO external_identity_links (issuer, subject, principal_id, status, revoked_at)
+VALUES
+  (
+    'https://clerk.example.test',
+    'user_owner_001',
+    '41000000-0000-4000-8000-000000000001',
+    'active',
+    NULL
+  ),
+  (
+    'https://clerk.example.test',
+    'user_disabled_003',
+    '43000000-0000-4000-8000-000000000003',
+    'active',
+    NULL
+  ),
+  (
+    'https://clerk.example.test',
+    'user_revoked_004',
+    '44000000-0000-4000-8000-000000000004',
+    'revoked',
+    now()
+  );

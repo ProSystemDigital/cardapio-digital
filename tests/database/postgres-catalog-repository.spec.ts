@@ -6,6 +6,7 @@ import { CatalogAdministrationService } from "../../application/catalog-administ
 import { CatalogConflictError } from "../../domain/catalog-administration";
 import { PostgresAuthorizationRepository } from "../../data/postgres-authorization-repository";
 import { AuthorizationService, AccessDeniedError } from "../../application/authorization-service";
+import { PostgresExternalIdentityLinkRepository } from "../../data/postgres-external-identity-link-repository";
 
 const databaseUrl = process.env.DATABASE_TEST_URL;
 if (!databaseUrl) throw new Error("DATABASE_TEST_URL é obrigatória no teste PostgreSQL.");
@@ -65,6 +66,31 @@ test("deriva memberships ativas e separa papel de plataforma", async () => {
       "30000000-0000-0000-0000-000000000003",
       "catalog.product.update",
     )).rejects.toBeInstanceOf(AccessDeniedError);
+  } finally {
+    await pool.end();
+  }
+});
+
+test("resolve somente vínculo Clerk ativo ligado a principal ativo", async () => {
+  const pool = new Pool({ connectionString: databaseUrl, max: 1 });
+  try {
+    const repository = new PostgresExternalIdentityLinkRepository(pool);
+    await expect(repository.resolvePrincipalId({
+      issuer: "https://clerk.example.test",
+      subject: "user_owner_001",
+    })).resolves.toBe("41000000-0000-4000-8000-000000000001");
+    await expect(repository.resolvePrincipalId({
+      issuer: "https://clerk.example.test",
+      subject: "user_disabled_003",
+    })).resolves.toBeNull();
+    await expect(repository.resolvePrincipalId({
+      issuer: "https://clerk.example.test",
+      subject: "user_revoked_004",
+    })).resolves.toBeNull();
+    await expect(repository.resolvePrincipalId({
+      issuer: "https://outro-emissor.example.test",
+      subject: "user_owner_001",
+    })).resolves.toBeNull();
   } finally {
     await pool.end();
   }

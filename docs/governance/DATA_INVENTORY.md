@@ -21,3 +21,5 @@ O teste do repositório PostgreSQL acrescenta uma fixture local fictícia com te
 A fundação de escrita registra na auditoria UUID técnico do ator, papel, ação, tipo e UUID da entidade, campos operacionais alterados e instante UTC. Não contém identidade civil ou contato. Retenção, acesso operacional e eventual vínculo com conta autenticada permanecem bloqueados até decisão de governança própria.
 
 A Fase 3.0 acrescenta principals, memberships e papéis de plataforma representados somente por UUID, estado, papel, versões e timestamps. Não há subject de fornecedor, nome, e-mail, telefone, senha, token ou cookie. O futuro vínculo com identidade externa exigirá atualização deste inventário antes da coleta.
+
+A Fase 3.1 especifica a persistência de `issuer` e `subject` pseudônimos, estado do vínculo e timestamps, exclusivamente para resolver o `principalId`. O gate usa valores fictícios e banco descartável; ainda não existe coleta real. A aplicação não copia nome, e-mail, telefone, senha, token ou organização do Clerk. Exclusão/revogação acompanhará o encerramento do acesso, ressalvada eventual evidência de auditoria com retenção própria.

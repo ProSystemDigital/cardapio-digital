@@ -19,6 +19,8 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - adaptador PostgreSQL de leitura selecionável no servidor, com memória como padrão seguro.
 - serviço interno de escrita para preço e disponibilidade, com autorização, versão e auditoria atômica.
 - autorização derivada de principal e membership persistida, ainda sem login ou fornecedor.
+- contrato portável de sessão verificada e vínculo externo, ainda sem SDK ou rota.
+- adaptador Clerk isolado para os futuros caminhos administrativos, ainda sem conta ou credencial conectada.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -30,6 +32,10 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `data/postgres-catalog-repository.ts`: implementação PostgreSQL somente de servidor;
 - `application/catalog-administration-service.ts`: autorização e validação dos comandos internos;
 - `application/authorization-service.ts`: matriz e derivação de acesso por principal;
+- `application/authenticated-identity-service.ts`: reduz sessão externa verificada a `principalId` interno;
+- `data/clerk-authentication-session-gateway.ts`: traduz uma sessão Clerk verificada para o contrato portável;
+- `data/postgres-external-identity-link-repository.ts`: resolve o vínculo pseudônimo para o UUID interno por função SQL estreita;
+- `data/authentication.server.ts`: compõe Clerk e PostgreSQL exclusivamente no servidor;
 - `application/authorized-catalog-administration-service.ts`: composição segura entre identidade e escrita;
 - `data/postgres-catalog-command-repository.ts`: escrita transacional PostgreSQL;
 - `app/`: apresentação Next.js e estado efêmero da experiência;

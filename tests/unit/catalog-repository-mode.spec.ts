@@ -33,4 +33,12 @@ test("composição PostgreSQL permanece restrita ao servidor", () => {
   );
   expect(composition).toMatch(/^import "server-only";/);
   expect(composition).toContain('from "./postgres-catalog-repository"');
+
+  const authenticationComposition = readFileSync(
+    resolve(process.cwd(), "data", "authentication.server.ts"),
+    "utf8",
+  );
+  expect(authenticationComposition).toMatch(/^import "server-only";/);
+  expect(authenticationComposition).toContain('from "./clerk-authentication-session-gateway"');
+  expect(authenticationComposition).toContain('from "./postgres-external-identity-link-repository"');
 });

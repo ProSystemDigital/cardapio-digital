@@ -19,6 +19,12 @@ const writesUp = readFileSync(resolve(migrationsDirectory, "0003_catalog_writes.
 const writesDown = readFileSync(resolve(migrationsDirectory, "0003_catalog_writes.down.sql"), "utf8");
 const authorizationUp = readFileSync(resolve(migrationsDirectory, "0004_identity_authorization.up.sql"), "utf8");
 const authorizationDown = readFileSync(resolve(migrationsDirectory, "0004_identity_authorization.down.sql"), "utf8");
+const identityLinksUp = readFileSync(resolve(migrationsDirectory, "0005_external_identity_links.up.sql"), "utf8");
+const identityLinksDown = readFileSync(resolve(migrationsDirectory, "0005_external_identity_links.down.sql"), "utf8");
+const identityLinksFixture = readFileSync(
+  resolve(process.cwd(), "database", "tests", "external-identity-fixture.sql"),
+  "utf8",
+);
 
 const tenantTables = [
   "tenants",
@@ -82,6 +88,21 @@ test("identidade separa memberships e papéis de plataforma sem PII", () => {
   expect(authorizationUp).toContain("platform_role_assignments_select_self");
   expect(authorizationUp).not.toMatch(/\b(email|phone|display_name|password|address)\b/i);
   expect(authorizationDown).toContain("DROP TABLE IF EXISTS principals");
+});
+
+test("vínculo externo expõe somente resolvedor estreito e reversível", () => {
+  expect(identityLinksUp.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(identityLinksDown.trim()).toMatch(/^BEGIN;[\s\S]*COMMIT;$/);
+  expect(identityLinksUp).toContain("CREATE TABLE external_identity_links");
+  expect(identityLinksUp).toContain("external_identity_links ENABLE ROW LEVEL SECURITY");
+  expect(identityLinksUp).not.toContain("CREATE POLICY");
+  expect(identityLinksUp).toContain("SECURITY DEFINER");
+  expect(identityLinksUp).toContain("SET search_path = pg_catalog, public");
+  expect(identityLinksUp).toContain("principal.status = 'active'");
+  expect(identityLinksUp).not.toMatch(/\b(email|phone|display_name|password|token)\b/i);
+  expect(identityLinksDown).toContain("DROP TABLE IF EXISTS external_identity_links");
+  expect(identityLinksFixture).toContain("status, revoked_at");
+  expect(identityLinksFixture).toContain("'revoked',\n    now()");
 });
 
 test("todas as tabelas negam acesso sem contexto de tenant", () => {

@@ -7,6 +7,8 @@ REVOKE INSERT, UPDATE, DELETE ON principals FROM cardapio_runtime_test;
 REVOKE INSERT, UPDATE, DELETE ON tenant_memberships FROM cardapio_runtime_test;
 REVOKE INSERT, UPDATE, DELETE ON platform_role_assignments FROM cardapio_runtime_test;
 REVOKE INSERT, UPDATE, DELETE ON access_audit_events FROM cardapio_runtime_test;
+REVOKE ALL ON external_identity_links FROM cardapio_runtime_test;
+GRANT EXECUTE ON FUNCTION public.resolve_external_principal_id(text, text) TO cardapio_runtime_test;
 
 INSERT INTO tenants (id, slug, display_name, short_name, tagline, order_channel, payment_timing)
 VALUES

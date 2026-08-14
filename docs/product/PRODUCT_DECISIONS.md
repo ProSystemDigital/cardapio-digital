@@ -105,3 +105,11 @@ A demonstração pública usa `/cardapio/[tenantSlug]`. O slug identifica o esta
 - Administrador da plataforma não acessa automaticamente qualquer tenant.
 - Principal desabilitado ou membership revogada perde autorização.
 - Nenhum fornecedor, login, sessão, convite, endpoint ou dado pessoal é introduzido.
+
+## Fase 3.1 — Fundação da autenticação e vínculo
+
+- A sessão será validada por adaptador exclusivo de servidor.
+- O vínculo externo usa emissor e subject somente para resolver `principalId`.
+- Claims externos nunca definem papel, tenant ou permissão.
+- Sessão ausente, expirada, inválida ou sem vínculo falha fechada.
+- A escolha do fornecedor e a governança dos identificadores antecedem SDK, migration, login e cookies.

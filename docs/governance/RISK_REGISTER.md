@@ -29,5 +29,11 @@
 | CD-25 | Papel ou tenant fornecido pelo cliente elevar privilégios | P0 | Mitigado no contrato local | A entrada contém somente `principalId`; membership e papel foram derivados no PostgreSQL antes do comando. Sessão real continua bloqueada até validação do provedor. |
 | CD-26 | Administrador da plataforma obter acesso implícito a tenants | P0 | Mitigado localmente | Papel e matriz separados foram comprovados no gate; suporte futuro exige concessão temporária explícita e auditada. |
 | CD-27 | Membership revogada continuar autorizando ações | P0 | Parcialmente mitigado | Membership/principal são consultados a cada operação e principal desabilitado foi negado; política de sessão será definida com o provedor. |
+| CD-28 | Claims externos concederem papel ou tenant indevido | P0 | Mitigado no contrato | A autenticação retorna somente `principalId`; autorização continua derivada das tabelas internas. |
+| CD-29 | Sessão expirada ou identidade sem vínculo obter acesso | P0 | Mitigado no contrato | Ausência, expiração, formato inválido e vínculo inexistente falham fechados com erro uniforme. Repetir no adaptador real. |
+| CD-30 | Subject externo pseudônimo ser persistido sem governança | P0 | Mitigado localmente | Finalidade, campos mínimos, revogação e acesso estreito foram registrados e comprovados no PostgreSQL; dados reais continuam bloqueados até o gate Clerk. |
+| CD-31 | Dependência do Clerk impedir migração futura | P1 | Mitigado por desenho | Adaptador isolado, UUID interno estável, exportação prevista e estratégia de saída no ADR 0013. |
+| CD-32 | Transferência internacional ocorrer sem avaliação LGPD | P0 | Bloqueado para dados reais | Clerk informa infraestrutura nos EUA; conta com dados reais depende de revisão humana do DPA, subprocessadores e base aplicável. |
+| CD-33 | Produção operar sem MFA por limitação do plano | P0 | Bloqueado | Hobby serve apenas ao desenvolvimento; produção administrativa exige Pro com MFA ou decisão substituta equivalente. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

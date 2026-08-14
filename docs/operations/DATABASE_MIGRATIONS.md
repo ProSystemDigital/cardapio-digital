@@ -59,3 +59,7 @@ O gate da Fase 2.3 foi executado com sucesso em 2026-08-14. A conclusão confirm
 Na Fase 3.0, o gate também aplica a migration 0004, carrega principals técnicos fictícios e comprova membership ativa, principal desabilitado e separação do administrador da plataforma. O ciclo de rollback passa a remover 0004 antes das migrations anteriores.
 
 O gate da Fase 3.0 foi executado com sucesso em 2026-08-14. A conclusão confirmou derivação de `owner`, negação para principal desabilitado, separação de `platform_admin`, migrations `down/up` e limpeza do papel descartável por `DROP ROLE`. Nenhuma identidade externa, credencial ou fixture foi retida.
+
+Na Fase 3.1, o gate aplica a migration 0005 e comprova que somente o par exato `(issuer, subject)` ativo, ligado a principal ativo, resolve um `principalId`. A tabela tem RLS habilitada sem política e todos os privilégios são revogados do runtime; somente a função estreita `resolve_external_principal_id`, executada pelo proprietário da migration com `search_path` fixo, pode ser chamada. O rollback remove 0005 antes da fundação de identidade.
+
+O gate da migration 0005 foi executado com sucesso em 2026-08-14. A conclusão confirmou resolução do vínculo ativo, negação de principal desabilitado, negação de vínculo revogado, migrations `down/up` e limpeza do papel descartável por `DROP ROLE`. Nenhum subject real, credencial Clerk ou fixture foi retido.

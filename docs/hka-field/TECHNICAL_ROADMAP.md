@@ -13,6 +13,8 @@
 | 2.2. Repositório PostgreSQL | Concluída | Adaptador real validado localmente atrás do contrato atual, com configuração explícita e retorno seguro à memória. |
 | 2.3. Escrita transacional do catálogo | Concluída | Gate real aprovado: preço e disponibilidade com ator autorizado, versão otimista e auditoria append-only. |
 | 3.0. Identidade e autorização | Concluída | Gate real aprovado: principal técnico, memberships por tenant, papel de plataforma separado e matriz negativa por padrão. |
+| 3.1. Fundação da autenticação | Concluída | Clerk aprovado; contrato portável, adaptador e vínculo PostgreSQL passaram no gate local, ainda sem conta ou sessão real. |
+| 3.2. Autenticação Clerk controlada | Planejada | Instância de desenvolvimento, login restrito, logout e revogação real antes do painel administrativo. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |

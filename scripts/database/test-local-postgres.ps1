@@ -21,9 +21,12 @@ $writesUpMigration = Join-Path $repositoryRoot "database\migrations\0003_catalog
 $writesDownMigration = Join-Path $repositoryRoot "database\migrations\0003_catalog_writes.down.sql"
 $authorizationUpMigration = Join-Path $repositoryRoot "database\migrations\0004_identity_authorization.up.sql"
 $authorizationDownMigration = Join-Path $repositoryRoot "database\migrations\0004_identity_authorization.down.sql"
+$identityLinksUpMigration = Join-Path $repositoryRoot "database\migrations\0005_external_identity_links.up.sql"
+$identityLinksDownMigration = Join-Path $repositoryRoot "database\migrations\0005_external_identity_links.down.sql"
 $isolationTest = Join-Path $repositoryRoot "database\tests\multitenant-isolation.sql"
 $repositoryFixture = Join-Path $repositoryRoot "database\tests\catalog-repository-fixture.sql"
 $authorizationFixture = Join-Path $repositoryRoot "database\tests\authorization-fixture.sql"
+$identityLinksFixture = Join-Path $repositoryRoot "database\tests\external-identity-fixture.sql"
 
 if (-not $env:PGPASSWORD) {
   $securePassword = Read-Host "Senha local do PostgreSQL" -AsSecureString
@@ -46,7 +49,15 @@ function Invoke-PsqlAdmin([string[]]$Arguments) {
 
 function Invoke-PsqlTestDatabase([string[]]$Arguments) {
   & $psql -X -w -v ON_ERROR_STOP=1 -h $HostName -p $Port -U $AdminUser -d $testDatabase @Arguments
-  if ($LASTEXITCODE -ne 0) { throw "psql no banco descartável falhou." }
+  if ($LASTEXITCODE -ne 0) {
+    $safeTarget = if ($Arguments.Count -ge 2 -and $Arguments[0] -eq "-f") {
+      Split-Path -Leaf $Arguments[1]
+    }
+    else {
+      "comando SQL controlado"
+    }
+    throw "psql no banco descartável falhou ao executar: $safeTarget."
+  }
 }
 
 $createdDatabase = $false
@@ -83,9 +94,11 @@ try {
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $isolationTest)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryFixture)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationFixture)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksFixture)
 
   $encodedRuntimePassword = [Uri]::EscapeDataString($runtimePassword)
   $env:DATABASE_TEST_URL = "postgresql://${runtimeRole}:${encodedRuntimePassword}@${HostName}:${Port}/${testDatabase}"
@@ -99,6 +112,7 @@ try {
     Remove-Item Env:\DATABASE_TEST_URL -ErrorAction SilentlyContinue
   }
 
+  Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryDownMigration)
@@ -113,6 +127,7 @@ try {
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksUpMigration)
   Write-Host "PostgreSQL local validado: up, RLS, isolamento, snapshots, down e novo up."
 }
 finally {
