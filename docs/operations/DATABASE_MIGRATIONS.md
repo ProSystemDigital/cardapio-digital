@@ -122,3 +122,13 @@ Para habilitar exclusivamente a edição de preço da Fase 3.7 no banco persiste
 O comando concede `UPDATE` somente em `products.base_price_in_cents`, `products.version` e `products.updated_at`, além de garantir `INSERT` na auditoria. Ele não amplia permissões para conteúdo, categorias ou exclusão.
 
 O gate da Fase 3.7 foi aprovado em 2026-08-15. O ciclo descartável confirmou migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a concessão mínima e a interface persistiu e auditou o novo preço, seguida de revisão visual, funcional e arquitetural humana.
+
+Para habilitar a consulta limitada da auditoria da Fase 3.8 no banco persistente local:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogAuditRead
+```
+
+O comando concede somente `SELECT` em `catalog_audit_events`. A interface mantém limite fixo de 20 eventos, aplica RLS pelo tenant derivado e não recebe escopo ou paginação do navegador.
+
+O gate da Fase 3.8 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a leitura mínima e a interface apresentou somente os eventos recentes do tenant derivado, seguida de revisão visual, funcional e arquitetural humana.

@@ -7,6 +7,7 @@ import { CatalogConflictError } from "../../domain/catalog-administration";
 import { PostgresAuthorizationRepository } from "../../data/postgres-authorization-repository";
 import { AuthorizationService, AccessDeniedError } from "../../application/authorization-service";
 import { PostgresExternalIdentityLinkRepository } from "../../data/postgres-external-identity-link-repository";
+import { PostgresCatalogAuditRepository } from "../../data/postgres-catalog-audit-repository";
 
 const databaseUrl = process.env.DATABASE_TEST_URL;
 if (!databaseUrl) throw new Error("DATABASE_TEST_URL é obrigatória no teste PostgreSQL.");
@@ -181,6 +182,14 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         { actor_role: "manager", changes: { isAvailable: true } },
         { actor_role: "manager", changes: { priceInCents: 2900 } },
       ]);
+      const recentAudit = await new PostgresCatalogAuditRepository(pool)
+        .listRecentByTenantId(command.tenantId, 20);
+      expect(recentAudit).toHaveLength(3);
+      expect(recentAudit[0]).toMatchObject({
+        productName: "Prato local",
+        actorRole: "manager",
+        priceInCents: 2900,
+      });
     } finally {
       client.release();
     }

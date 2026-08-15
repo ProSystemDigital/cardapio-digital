@@ -22,9 +22,11 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain("await resolveCurrentTenantAccess(identity.identity)");
   expect(page).toContain('identity.kind === "denied"');
   expect(page).toContain("tenantAccess.length !== 1");
-  expect(page).toContain("await loadDerivedTenantCatalog(tenantId)");
+  expect(page).toContain("await Promise.all([");
+  expect(page).toContain("loadDerivedTenantCatalog(tenantId)");
   expect(page).toContain("<AvailabilityForm");
   expect(page).toContain("<PriceForm");
+  expect(page).toContain("loadAuthorizedCatalogAudit(identity.identity, tenantId)");
   expect(page).not.toMatch(/searchParams|params\s*:/);
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
   expect(signIn).toContain('fallbackRedirectUrl="/admin"');
@@ -58,12 +60,26 @@ test("provisionamento local não imprime identidade ou credencial", () => {
   expect(executor).toContain('action === "enablecatalogread"');
   expect(executor).toContain('action === "enablecatalogavailabilitywrite"');
   expect(executor).toContain('action === "enablecatalogpricewrite"');
+  expect(executor).toContain('action === "enablecatalogauditread"');
   expect(executor).toContain("GRANT SELECT ON TABLE");
   expect(executor).toContain("GRANT UPDATE (is_available, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (base_price_in_cents, version, updated_at)");
   expect(executor).toContain("GRANT INSERT ON TABLE catalog_audit_events");
   expect(executor).not.toContain("GRANT UPDATE (is_available, base_price_in_cents");
   expect(executor).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE).*readableTables/i);
+});
+
+test("auditoria administrativa é autorizada, limitada e não expõe ator técnico", () => {
+  const page = read("app/admin/page.tsx");
+  const composition = read("data/admin-catalog-audit.server.ts");
+  const repository = read("data/postgres-catalog-audit-repository.ts");
+  expect(composition).toContain('authorizeTenant(identity, tenantId, "tenant.audit.read")');
+  expect(composition).toContain("AUDIT_EVENT_LIMIT = 20");
+  expect(repository).toContain("BEGIN READ ONLY");
+  expect(repository).toContain("set_config('app.tenant_id'");
+  expect(repository).toContain("LIMIT $2");
+  expect(page).not.toMatch(/actorId|issuer|subject|userId/);
+  expect(page).not.toMatch(/searchParams|params\s*:/);
 });
 
 test("mutação de disponibilidade deriva identidade e tenant novamente no servidor", () => {

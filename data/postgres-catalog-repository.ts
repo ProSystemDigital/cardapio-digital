@@ -105,8 +105,8 @@ export class PostgresCatalogRepository implements CatalogRepository {
 
 async function loadCatalog(client: Queryable, tenantId: string): Promise<VersionedTenantCatalog> {
   const [tenantResult, modesResult, hoursResult, categoriesResult, productsResult] =
-    await Promise.all([
-      client.query<{
+    [
+      await client.query<{
         id: string; slug: string; display_name: string; short_name: string;
         tagline: string; payment_timing: "on_fulfillment"; order_channel: "whatsapp";
         minimum_order_in_cents: string; delivery_fee_in_cents: string | null;
@@ -116,19 +116,19 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
         FROM tenants t
         JOIN tenant_operations o ON o.tenant_id = t.id
         WHERE t.id = $1 AND t.archived_at IS NULL`, [tenantId]),
-      client.query<{ mode: FulfillmentMode }>(
+      await client.query<{ mode: FulfillmentMode }>(
         "SELECT mode FROM tenant_fulfillment_modes WHERE tenant_id = $1 ORDER BY mode",
         [tenantId],
       ),
-      client.query<{ weekday: number; opens_at: string; closes_at: string }>(
+      await client.query<{ weekday: number; opens_at: string; closes_at: string }>(
         "SELECT weekday, opens_at::text, closes_at::text FROM business_hours WHERE tenant_id = $1 ORDER BY weekday",
         [tenantId],
       ),
-      client.query<{ id: string; tenant_id: string; name: string; sort_order: number }>(
+      await client.query<{ id: string; tenant_id: string; name: string; sort_order: number }>(
         "SELECT id, tenant_id, name, sort_order FROM categories WHERE tenant_id = $1 AND archived_at IS NULL ORDER BY sort_order, name",
         [tenantId],
       ),
-      client.query<{
+      await client.query<{
         id: string; tenant_id: string; category_id: string; name: string;
         description: string; base_price_in_cents: string; emoji: string;
         tag: string | null; is_available: boolean; version: string;
@@ -137,7 +137,7 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
         FROM products
         WHERE tenant_id = $1 AND archived_at IS NULL
         ORDER BY name`, [tenantId]),
-    ]);
+    ];
 
   const tenant = tenantResult.rows[0];
   if (!tenant) throw new Error("Tenant resolvido sem configuração operacional.");
@@ -210,24 +210,24 @@ async function loadProductOptions(
   if (productIds.length === 0) {
     return [new Map(), new Map(), new Map(), new Map()];
   }
-  const [modesResult, variationsResult, groupsResult, addonsResult] = await Promise.all([
-    client.query<{ product_id: string; mode: FulfillmentMode }>(
+  const [modesResult, variationsResult, groupsResult, addonsResult] = [
+    await client.query<{ product_id: string; mode: FulfillmentMode }>(
       "SELECT product_id, mode FROM product_fulfillment_modes WHERE tenant_id = $1 AND product_id = ANY($2::uuid[]) ORDER BY mode",
       [tenantId, productIds],
     ),
-    client.query<{ product_id: string; id: string; name: string; price_delta_in_cents: string; is_available: boolean }>(
+    await client.query<{ product_id: string; id: string; name: string; price_delta_in_cents: string; is_available: boolean }>(
       "SELECT product_id, id, name, price_delta_in_cents, is_available FROM product_variations WHERE tenant_id = $1 AND product_id = ANY($2::uuid[]) AND archived_at IS NULL ORDER BY name",
       [tenantId, productIds],
     ),
-    client.query<{ product_id: string; id: string; name: string; minimum_selections: number; maximum_selections: number }>(
+    await client.query<{ product_id: string; id: string; name: string; minimum_selections: number; maximum_selections: number }>(
       "SELECT product_id, id, name, minimum_selections, maximum_selections FROM addon_groups WHERE tenant_id = $1 AND product_id = ANY($2::uuid[]) AND archived_at IS NULL ORDER BY name",
       [tenantId, productIds],
     ),
-    client.query<{ addon_group_id: string; id: string; name: string; price_in_cents: string; is_available: boolean }>(
+    await client.query<{ addon_group_id: string; id: string; name: string; price_in_cents: string; is_available: boolean }>(
       "SELECT addon_group_id, id, name, price_in_cents, is_available FROM addons WHERE tenant_id = $1 AND product_id = ANY($2::uuid[]) AND archived_at IS NULL ORDER BY name",
       [tenantId, productIds],
     ),
-  ]);
+  ];
 
   const modes = new Map<string, FulfillmentMode[]>();
   for (const row of modesResult.rows) append(modes, row.product_id, row.mode);

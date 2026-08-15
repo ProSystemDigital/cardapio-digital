@@ -27,6 +27,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - catálogo administrativo somente leitura carregado pelo tenant derivado, sem controles de edição.
 - mutação administrativa limitada à disponibilidade, com autorização renovada, confirmação, versão otimista e auditoria transacional em gate local.
 - edição administrativa de preço em centavos, separada da disponibilidade e ainda em gate local.
+- consulta administrativa limitada da auditoria do tenant, somente leitura e sem identidade externa.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 

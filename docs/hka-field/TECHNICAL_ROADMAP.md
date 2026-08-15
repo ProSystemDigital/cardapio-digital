@@ -20,7 +20,7 @@
 | 3.5. Catálogo administrativo somente leitura | Concluída | Leitura pelo tenant derivado, permissão mínima persistente e interface sem mutações aprovadas no gate PostgreSQL e na revisão humana. |
 | 3.6. Disponibilidade administrativa controlada | Concluída | Mutação real aprovada com autorização renovada, confirmação, versão otimista, auditoria transacional e permissão PostgreSQL mínima. |
 | 3.7. Preço administrativo controlado | Concluída | Edição monetária real aprovada com centavos, limite, autorização renovada, confirmação, versão otimista, auditoria e permissão mínima. |
-| 3.8. Auditoria administrativa somente leitura | Planejada | Consulta dos eventos do tenant derivado, sem PII e sem capacidade de alterar ou excluir a trilha. |
+| 3.8. Auditoria administrativa somente leitura | Concluída | Consulta limitada aprovada pelo tenant derivado, sem PII e sem capacidade de alterar ou excluir a trilha. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |

@@ -4,6 +4,7 @@ import {
   resolveCurrentTenantAccess,
 } from "../../data/authentication.server";
 import { loadDerivedTenantCatalog } from "../../data/admin-catalog.server";
+import { loadAuthorizedCatalogAudit } from "../../data/admin-catalog-audit.server";
 import { SignOutButton } from "./sign-out-button";
 import { AvailabilityForm } from "./availability-form";
 import { PriceForm } from "./price-form";
@@ -54,9 +55,14 @@ export default async function AdminPage() {
 
   const roleLabel = tenantAccess[0].role === "owner" ? "Proprietário" : "Gerente";
   const tenantId = tenantAccess[0].tenantId;
-  const catalog = tenantId ? await loadDerivedTenantCatalog(tenantId) : null;
+  const [catalog, auditEvents] = tenantId
+    ? await Promise.all([
+        loadDerivedTenantCatalog(tenantId),
+        loadAuthorizedCatalogAudit(identity.identity, tenantId),
+      ])
+    : [null, null];
 
-  if (!catalog) {
+  if (!catalog || !auditEvents) {
     return (
       <main className={styles.page}>
         <section className={styles.panel} aria-labelledby="admin-title">
@@ -128,6 +134,50 @@ export default async function AdminPage() {
           </ul>
           <p className={styles.readOnlyNotice}>
             Disponibilidade e preço possuem confirmações independentes. Demais dados permanecem bloqueados.
+          </p>
+        </section>
+        <section className={styles.audit} aria-labelledby="audit-title">
+          <div className={styles.catalogHeader}>
+            <div>
+              <p className={styles.eyebrow}>Somente leitura</p>
+              <h2 className={styles.catalogTitle} id="audit-title">Alterações recentes</h2>
+            </div>
+            <span className={styles.catalogCount}>{auditEvents.length} eventos</span>
+          </div>
+          {auditEvents.length > 0 ? (
+            <ol className={styles.auditList}>
+              {auditEvents.map((event) => (
+                <li className={styles.auditItem} key={event.id}>
+                  <div className={styles.auditHeading}>
+                    <strong>{event.productName}</strong>
+                    <time dateTime={event.occurredAt.toISOString()}>
+                      {event.occurredAt.toLocaleString("pt-BR", {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                        timeZone: "America/Sao_Paulo",
+                      })}
+                    </time>
+                  </div>
+                  <p>
+                    {event.priceInCents !== undefined
+                      ? `Preço definido como ${(event.priceInCents / 100).toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}.`
+                      : null}
+                    {event.isAvailable !== undefined
+                      ? ` Disponibilidade definida como ${event.isAvailable ? "disponível" : "indisponível"}.`
+                      : null}
+                  </p>
+                  <span>Papel responsável: {event.actorRole === "owner" ? "Proprietário" : "Gerente"}</span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className={styles.readOnlyNotice}>Nenhuma alteração de catálogo registrada.</p>
+          )}
+          <p className={styles.readOnlyNotice}>
+            A trilha não exibe identidade externa e não pode ser alterada ou excluída por esta interface.
           </p>
         </section>
         <div className={styles.actions}><SignOutButton /></div>

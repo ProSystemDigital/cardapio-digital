@@ -281,6 +281,19 @@ async function enableCatalogPriceWrite() {
   console.log("Mutação local de preço habilitada.");
 }
 
+async function enableCatalogAuditRead() {
+  const database = new Client(adminConfig(databaseName));
+  await database.connect();
+  try {
+    await database.query(
+      `GRANT SELECT ON TABLE catalog_audit_events TO ${quoteIdentifier(runtimeRole)}`,
+    );
+  } finally {
+    await database.end();
+  }
+  console.log("Leitura local da auditoria de catálogo habilitada.");
+}
+
 const environment = parseEnvironment(await readFile(envPath, "utf8"));
 const identity = await resolveSingleDevelopmentIdentity(environment);
 
@@ -291,4 +304,5 @@ else if (action === "upgrade") await upgradeAuthorization();
 else if (action === "enablecatalogread") await enableCatalogRead();
 else if (action === "enablecatalogavailabilitywrite") await enableCatalogAvailabilityWrite();
 else if (action === "enablecatalogpricewrite") await enableCatalogPriceWrite();
+else if (action === "enablecatalogauditread") await enableCatalogAuditRead();
 else throw new Error("Ação local inválida.");

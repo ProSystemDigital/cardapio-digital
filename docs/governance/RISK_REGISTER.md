@@ -35,5 +35,6 @@
 | CD-31 | Dependência do Clerk impedir migração futura | P1 | Mitigado por desenho | Adaptador isolado, UUID interno estável, exportação prevista e estratégia de saída no ADR 0013. |
 | CD-32 | Transferência internacional ocorrer sem avaliação LGPD | P0 | Bloqueado para dados reais | Clerk informa infraestrutura nos EUA; conta com dados reais depende de revisão humana do DPA, subprocessadores e base aplicável. |
 | CD-33 | Produção operar sem MFA por limitação do plano | P0 | Bloqueado | Hobby serve apenas ao desenvolvimento; produção administrativa exige Pro com MFA ou decisão substituta equivalente. |
+| CD-34 | Auditoria crescer sem retenção ou expor identidade técnica desnecessária | P1 | Parcialmente mitigado | Interface limita 20 eventos e omite UUID e identidade externa; retenção, paginação e exportação permanecem bloqueadas até decisão de governança. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.
