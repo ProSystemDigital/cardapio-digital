@@ -12,6 +12,8 @@ export type UpdateProductCommand = {
   expectedVersion: number;
   priceInCents?: number;
   isAvailable?: boolean;
+  name?: string;
+  description?: string;
 };
 
 export type CatalogAuditEntry = {
@@ -21,7 +23,7 @@ export type CatalogAuditEntry = {
   action: "product.updated";
   entityType: "product";
   entityId: ProductId;
-  changes: Readonly<Record<string, number | boolean>>;
+  changes: Readonly<Record<string, number | boolean | string>>;
 };
 
 export type CatalogMutationResult = {
@@ -35,6 +37,8 @@ export class CatalogConflictError extends Error {}
 export class CatalogEntityNotFoundError extends Error {}
 
 export const MAX_PRODUCT_PRICE_IN_CENTS = 99_999_999;
+export const MAX_PRODUCT_NAME_LENGTH = 120;
+export const MAX_PRODUCT_DESCRIPTION_LENGTH = 500;
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -59,7 +63,12 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
   if (!Number.isSafeInteger(command.expectedVersion) || command.expectedVersion < 1) {
     throw new CatalogValidationError("Versão esperada inválida.");
   }
-  if (command.priceInCents === undefined && command.isAvailable === undefined) {
+  if (
+    command.priceInCents === undefined &&
+    command.isAvailable === undefined &&
+    command.name === undefined &&
+    command.description === undefined
+  ) {
     throw new CatalogValidationError("Informe ao menos uma alteração do produto.");
   }
   if (
@@ -69,5 +78,17 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
       command.priceInCents > MAX_PRODUCT_PRICE_IN_CENTS)
   ) {
     throw new CatalogValidationError("Preço deve ser inteiro em centavos dentro do limite.");
+  }
+  if (
+    command.name !== undefined &&
+    (!command.name.trim() || command.name.length > MAX_PRODUCT_NAME_LENGTH)
+  ) {
+    throw new CatalogValidationError("Nome do produto inválido.");
+  }
+  if (
+    command.description !== undefined &&
+    command.description.length > MAX_PRODUCT_DESCRIPTION_LENGTH
+  ) {
+    throw new CatalogValidationError("Descrição do produto inválida.");
   }
 }

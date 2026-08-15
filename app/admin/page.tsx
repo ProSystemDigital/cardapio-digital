@@ -8,6 +8,7 @@ import { loadAuthorizedCatalogAudit } from "../../data/admin-catalog-audit.serve
 import { SignOutButton } from "./sign-out-button";
 import { AvailabilityForm } from "./availability-form";
 import { PriceForm } from "./price-form";
+import { ContentForm } from "./content-form";
 import styles from "./admin.module.scss";
 
 export default async function AdminPage() {
@@ -129,11 +130,17 @@ export default async function AdminPage() {
                   version={product.version}
                   priceInCents={product.priceInCents}
                 />
+                <ContentForm
+                  productId={product.id}
+                  version={product.version}
+                  name={product.name}
+                  description={product.description}
+                />
               </li>
             ))}
           </ul>
           <p className={styles.readOnlyNotice}>
-            Disponibilidade e preço possuem confirmações independentes. Demais dados permanecem bloqueados.
+            Disponibilidade, preço e conteúdo possuem confirmações independentes. Demais dados permanecem bloqueados.
           </p>
         </section>
         <section className={styles.audit} aria-labelledby="audit-title">
@@ -168,6 +175,8 @@ export default async function AdminPage() {
                     {event.isAvailable !== undefined
                       ? ` Disponibilidade definida como ${event.isAvailable ? "disponível" : "indisponível"}.`
                       : null}
+                    {event.name !== undefined ? ` Nome definido como “${event.name}”.` : null}
+                    {event.description !== undefined ? " Descrição pública atualizada." : null}
                   </p>
                   <span>Papel responsável: {event.actorRole === "owner" ? "Proprietário" : "Gerente"}</span>
                 </li>

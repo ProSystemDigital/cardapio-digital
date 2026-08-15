@@ -202,6 +202,43 @@
   border-top: 1px solid rgba(16, 38, 29, 0.1);
 }
 
+.contentForm {
+  flex: 1 0 100%;
+  width: 100%;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(16, 38, 29, 0.1);
+}
+
+.contentField {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  color: #456157;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.contentField input,
+.contentField textarea {
+  width: 100%;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgba(16, 38, 29, 0.25);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #10261d;
+  font: inherit;
+}
+
+.contentField textarea {
+  resize: vertical;
+}
+
+.contentField input:focus-visible,
+.contentField textarea:focus-visible {
+  outline: 3px solid #d8a243;
+  outline-offset: 2px;
+}
+
 .priceField {
   display: grid;
   gap: 0.4rem;

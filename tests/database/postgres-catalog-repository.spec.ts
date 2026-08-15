@@ -151,6 +151,16 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       productId: command.productId,
       version: 4,
     });
+    await expect(service.updateProduct(actor, {
+      tenantId: command.tenantId,
+      productId: command.productId,
+      expectedVersion: 4,
+      name: "Prato atualizado",
+      description: "Descrição atualizada.",
+    })).resolves.toEqual({
+      productId: command.productId,
+      version: 5,
+    });
     await expect(service.updateProduct(actor, command)).rejects.toBeInstanceOf(
       CatalogConflictError,
     );
@@ -159,8 +169,8 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
     try {
       await client.query("BEGIN READ ONLY");
       await client.query("SELECT set_config('app.tenant_id', $1, true)", [command.tenantId]);
-      const product = await client.query<{ base_price_in_cents: string; is_available: boolean; version: string }>(
-        "SELECT base_price_in_cents, is_available, version FROM products WHERE tenant_id = $1 AND id = $2",
+      const product = await client.query<{ name: string; description: string; base_price_in_cents: string; is_available: boolean; version: string }>(
+        "SELECT name, description, base_price_in_cents, is_available, version FROM products WHERE tenant_id = $1 AND id = $2",
         [command.tenantId, command.productId],
       );
       const audit = await client.query<{ actor_role: string; changes: Record<string, unknown> }>(
@@ -170,9 +180,11 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       await client.query("COMMIT");
 
       expect(product.rows[0]).toEqual({
+        name: "Prato atualizado",
+        description: "Descrição atualizada.",
         base_price_in_cents: "2900",
         is_available: true,
-        version: "4",
+        version: "5",
       });
       expect(audit.rows).toEqual([
         { actor_role: "manager", changes: {
@@ -181,14 +193,16 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         } },
         { actor_role: "manager", changes: { isAvailable: true } },
         { actor_role: "manager", changes: { priceInCents: 2900 } },
+        { actor_role: "manager", changes: { name: "Prato atualizado", description: "Descrição atualizada." } },
       ]);
       const recentAudit = await new PostgresCatalogAuditRepository(pool)
         .listRecentByTenantId(command.tenantId, 20);
-      expect(recentAudit).toHaveLength(3);
+      expect(recentAudit).toHaveLength(4);
       expect(recentAudit[0]).toMatchObject({
-        productName: "Prato local",
+        productName: "Prato atualizado",
         actorRole: "manager",
-        priceInCents: 2900,
+        name: "Prato atualizado",
+        description: "Descrição atualizada.",
       });
     } finally {
       client.release();

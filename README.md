@@ -28,6 +28,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - mutação administrativa limitada à disponibilidade, com autorização renovada, confirmação, versão otimista e auditoria transacional em gate local.
 - edição administrativa de preço em centavos, separada da disponibilidade e ainda em gate local.
 - consulta administrativa limitada da auditoria do tenant, somente leitura e sem identidade externa.
+- edição administrativa limitada ao nome e à descrição pública do produto, com confirmação, versão otimista e auditoria.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -51,7 +52,7 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `tests/visual/` e `tests/pwa/`: comportamento no navegador e operação offline.
 
 Banco remoto provisionado, painel administrativo de catálogo, API administrativa, analytics, pagamento online e integrações externas estão fora desta fase.
-As superfícies de comando são Server Actions internas e separadas para disponibilidade e preço. Ambas derivam novamente identidade, tenant e papel no servidor; demais mutações continuam bloqueadas.
+As superfícies de comando são Server Actions internas e separadas para disponibilidade, preço e conteúdo. Todas derivam novamente identidade, tenant e papel no servidor; demais mutações continuam bloqueadas.
 
 Variações e adicionais podem ser selecionados em uma caixa de diálogo acessível. Antes da prévia, todas as linhas e valores são reconstruídos pelo catálogo atual. A mensagem pode ser copiada localmente, mas não abre WhatsApp, não solicita dados pessoais e não envia ou confirma um pedido.
 

@@ -58,7 +58,7 @@ test("nega outro tenant e administrador da plataforma por padrão", async () => 
   expect(spy.calls).toHaveLength(0);
 });
 
-test("rejeita ator inválido, comando vazio, preço e versão inválidos", async () => {
+test("rejeita ator inválido, comando vazio, preço, conteúdo e versão inválidos", async () => {
   const service = new CatalogAdministrationService(repositorySpy().repository);
   await expect(service.updateProduct({ ...actor, id: "ator" }, command)).rejects.toBeInstanceOf(
     CatalogAuthorizationError,
@@ -68,10 +68,26 @@ test("rejeita ator inválido, comando vazio, preço e versão inválidos", async
     { ...command, expectedVersion: 0 },
     { ...command, priceInCents: -1 },
     { ...command, priceInCents: 100_000_000 },
+    { ...command, name: " " },
+    { ...command, name: "x".repeat(121) },
+    { ...command, description: "x".repeat(501) },
     { tenantId, productId: command.productId, expectedVersion: 1 },
   ]) {
     await expect(service.updateProduct(actor, invalid)).rejects.toBeInstanceOf(
       CatalogValidationError,
     );
   }
+});
+
+test("aceita nome e descrição dentro dos limites", async () => {
+  const spy = repositorySpy();
+  const service = new CatalogAdministrationService(spy.repository);
+  await expect(service.updateProduct(actor, {
+    tenantId,
+    productId: command.productId,
+    expectedVersion: 1,
+    name: "Prato atualizado",
+    description: "Descrição pública atualizada.",
+  })).resolves.toEqual({ productId: command.productId, version: 2 });
+  expect(spy.calls).toHaveLength(1);
 });

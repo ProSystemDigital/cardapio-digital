@@ -56,6 +56,8 @@ function toCatalogAuditEvent(row: AuditRow): CatalogAuditEvent {
   }
   const priceInCents = row.changes.priceInCents;
   const isAvailable = row.changes.isAvailable;
+  const name = row.changes.name;
+  const description = row.changes.description;
   return {
     id: row.id,
     productName: row.product_name,
@@ -64,6 +66,8 @@ function toCatalogAuditEvent(row: AuditRow): CatalogAuditEvent {
       ? { priceInCents }
       : {}),
     ...(typeof isAvailable === "boolean" ? { isAvailable } : {}),
+    ...(typeof name === "string" ? { name } : {}),
+    ...(typeof description === "string" ? { description } : {}),
     occurredAt: new Date(row.occurred_at),
   };
 }

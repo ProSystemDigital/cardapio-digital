@@ -6,6 +6,8 @@ export type CatalogAuditEvent = {
   actorRole: Extract<TenantRole, "owner" | "manager">;
   priceInCents?: number;
   isAvailable?: boolean;
+  name?: string;
+  description?: string;
   occurredAt: Date;
 };
 

@@ -132,3 +132,13 @@ Para habilitar a consulta limitada da auditoria da Fase 3.8 no banco persistente
 O comando concede somente `SELECT` em `catalog_audit_events`. A interface mantém limite fixo de 20 eventos, aplica RLS pelo tenant derivado e não recebe escopo ou paginação do navegador.
 
 O gate da Fase 3.8 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a leitura mínima e a interface apresentou somente os eventos recentes do tenant derivado, seguida de revisão visual, funcional e arquitetural humana.
+
+Para habilitar nome e descrição na Fase 3.9 no banco persistente local:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogContentWrite
+```
+
+O comando concede `UPDATE` somente em `products.name`, `products.description`, `products.version` e `products.updated_at`, além de garantir `INSERT` na auditoria. Criação, exclusão, categorias, imagens e demais colunas permanecem bloqueadas.
+
+O gate da Fase 3.9 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a alteração mínima de conteúdo e sua auditoria, seguida de revisão visual, funcional e arquitetural humana.

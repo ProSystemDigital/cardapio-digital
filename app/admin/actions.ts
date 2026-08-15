@@ -7,12 +7,15 @@ import type { TrustedIdentity } from "../../domain/authorization";
 import type { TenantId } from "../../domain/catalog";
 import {
   MAX_PRODUCT_PRICE_IN_CENTS,
+  MAX_PRODUCT_DESCRIPTION_LENGTH,
+  MAX_PRODUCT_NAME_LENGTH,
   CatalogConflictError,
   CatalogEntityNotFoundError,
   CatalogValidationError,
 } from "../../domain/catalog-administration";
 import {
   updateDerivedProductAvailability,
+  updateDerivedProductContent,
   updateDerivedProductPrice,
 } from "../../data/admin-catalog-command.server";
 import {
@@ -26,6 +29,7 @@ export type AvailabilityActionState = {
 };
 
 export type PriceActionState = AvailabilityActionState;
+export type ContentActionState = AvailabilityActionState;
 
 const PRODUCT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PRICE_PATTERN = /^\d{1,6}(?:[.,]\d{1,2})?$/;
@@ -163,4 +167,66 @@ export async function updateProductPrice(
 
   revalidatePath("/admin");
   return { status: "success", message: "Preço atualizado e auditado." };
+}
+
+export async function updateProductContent(
+  _previousState: ContentActionState,
+  formData: FormData,
+): Promise<ContentActionState> {
+  await auth.protect();
+
+  if (formData.get("confirmed") !== "yes") {
+    return { status: "error", message: "Confirme conscientemente a alteração de conteúdo." };
+  }
+
+  const productId = formData.get("productId");
+  const versionValue = formData.get("expectedVersion");
+  const rawName = formData.get("name");
+  const rawDescription = formData.get("description");
+  const expectedVersion = typeof versionValue === "string" ? Number(versionValue) : NaN;
+  const name = typeof rawName === "string" ? rawName.trim() : "";
+  const description = typeof rawDescription === "string" ? rawDescription.trim() : "";
+  if (
+    typeof productId !== "string" ||
+    !PRODUCT_ID_PATTERN.test(productId) ||
+    !Number.isSafeInteger(expectedVersion) ||
+    expectedVersion < 1 ||
+    !name ||
+    name.length > MAX_PRODUCT_NAME_LENGTH ||
+    description.length > MAX_PRODUCT_DESCRIPTION_LENGTH
+  ) {
+    return { status: "error", message: "Informe nome e descrição dentro dos limites permitidos." };
+  }
+
+  const context = await resolveMutationContext();
+  if ("status" in context) return context;
+
+  try {
+    const result = await updateDerivedProductContent({
+      identity: context.identity,
+      tenantId: context.tenantId,
+      productId,
+      expectedVersion,
+      name,
+      description,
+    });
+    if (!result) {
+      return { status: "error", message: "A persistência administrativa está indisponível." };
+    }
+  } catch (error) {
+    if (error instanceof CatalogConflictError) {
+      return { status: "error", message: "O produto mudou. Recarregue e confirme novamente." };
+    }
+    if (
+      error instanceof AccessDeniedError ||
+      error instanceof CatalogEntityNotFoundError ||
+      error instanceof CatalogValidationError
+    ) {
+      return { status: "error", message: "A alteração foi recusada com segurança." };
+    }
+    throw error;
+  }
+
+  revalidatePath("/admin");
+  return { status: "success", message: "Conteúdo atualizado e auditado." };
 }

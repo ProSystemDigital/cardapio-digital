@@ -72,3 +72,27 @@ export async function updateDerivedProductPrice(input: {
     priceInCents: input.priceInCents,
   });
 }
+
+export async function updateDerivedProductContent(input: {
+  identity: TrustedIdentity;
+  tenantId: TenantId;
+  productId: string;
+  expectedVersion: number;
+  name: string;
+  description: string;
+}): Promise<CatalogMutationResult | null> {
+  const pool = getCommandPool();
+  if (!pool) return null;
+
+  const service = new AuthorizedCatalogAdministrationService(
+    new AuthorizationService(new PostgresAuthorizationRepository(pool)),
+    new CatalogAdministrationService(new PostgresCatalogCommandRepository(pool)),
+  );
+  return service.updateProduct(input.identity, {
+    tenantId: input.tenantId,
+    productId: input.productId,
+    expectedVersion: input.expectedVersion,
+    name: input.name,
+    description: input.description,
+  });
+}

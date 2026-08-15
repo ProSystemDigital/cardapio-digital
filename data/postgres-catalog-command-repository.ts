@@ -34,6 +34,14 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
         parameters.push(command.isAvailable);
         updateFields.push(`is_available = $${parameters.length}::boolean`);
       }
+      if (command.name !== undefined) {
+        parameters.push(command.name);
+        updateFields.push(`name = $${parameters.length}::text`);
+      }
+      if (command.description !== undefined) {
+        parameters.push(command.description);
+        updateFields.push(`description = $${parameters.length}::text`);
+      }
       updateFields.push("version = version + 1", "updated_at = now()");
       const updated = await client.query<{ id: string; version: string }>(
         `UPDATE products
@@ -61,6 +69,8 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
       const changes = {
         ...(command.priceInCents === undefined ? {} : { priceInCents: command.priceInCents }),
         ...(command.isAvailable === undefined ? {} : { isAvailable: command.isAvailable }),
+        ...(command.name === undefined ? {} : { name: command.name }),
+        ...(command.description === undefined ? {} : { description: command.description }),
       };
       await client.query(
         `INSERT INTO catalog_audit_events

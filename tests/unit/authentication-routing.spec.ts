@@ -26,6 +26,7 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain("loadDerivedTenantCatalog(tenantId)");
   expect(page).toContain("<AvailabilityForm");
   expect(page).toContain("<PriceForm");
+  expect(page).toContain("<ContentForm");
   expect(page).toContain("loadAuthorizedCatalogAudit(identity.identity, tenantId)");
   expect(page).not.toMatch(/searchParams|params\s*:/);
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
@@ -61,9 +62,11 @@ test("provisionamento local não imprime identidade ou credencial", () => {
   expect(executor).toContain('action === "enablecatalogavailabilitywrite"');
   expect(executor).toContain('action === "enablecatalogpricewrite"');
   expect(executor).toContain('action === "enablecatalogauditread"');
+  expect(executor).toContain('action === "enablecatalogcontentwrite"');
   expect(executor).toContain("GRANT SELECT ON TABLE");
   expect(executor).toContain("GRANT UPDATE (is_available, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (base_price_in_cents, version, updated_at)");
+  expect(executor).toContain("GRANT UPDATE (name, description, version, updated_at)");
   expect(executor).toContain("GRANT INSERT ON TABLE catalog_audit_events");
   expect(executor).not.toContain("GRANT UPDATE (is_available, base_price_in_cents");
   expect(executor).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE).*readableTables/i);
@@ -103,6 +106,19 @@ test("edição de preço converte reais em centavos e não aceita contexto de au
   expect(action).toContain("await updateDerivedProductPrice");
   expect(action).not.toMatch(/formData\.get\(["'](?:tenantId|role|actorId)/);
   expect(form).toContain('inputMode="decimal"');
+  expect(form).toContain('name="confirmed" required');
+  expect(form).toContain('name="expectedVersion"');
+});
+
+test("edição de conteúdo limita campos e renova autorização no servidor", () => {
+  const action = read("app/admin/actions.ts");
+  const form = read("app/admin/content-form.tsx");
+  expect(action).toContain("await updateDerivedProductContent");
+  expect(action).toContain("MAX_PRODUCT_NAME_LENGTH");
+  expect(action).toContain("MAX_PRODUCT_DESCRIPTION_LENGTH");
+  expect(action).not.toMatch(/formData\.get\(["'](?:tenantId|role|actorId)/);
+  expect(form).toContain('maxLength={120}');
+  expect(form).toContain('maxLength={500}');
   expect(form).toContain('name="confirmed" required');
   expect(form).toContain('name="expectedVersion"');
 });
