@@ -1,0 +1,88 @@
+.page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+  background:
+    radial-gradient(circle at top, rgba(216, 162, 67, 0.16), transparent 34rem),
+    #f5f1e8;
+  color: #10261d;
+}
+
+.panel {
+  width: min(100%, 34rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid rgba(16, 38, 29, 0.12);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1.5rem 4rem rgba(16, 38, 29, 0.12);
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #7a4e14;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.8rem, 5vw, 2.75rem);
+  line-height: 1.05;
+}
+
+.description {
+  margin: 1rem 0 0;
+  color: #456157;
+  line-height: 1.65;
+}
+
+.status {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #e6f1eb;
+  color: #174b36;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1.5rem;
+}
+
+.button {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #10261d;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button:focus-visible {
+  outline: 3px solid #d8a243;
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.actionError {
+  margin: 0.75rem 0 0;
+  color: #8a1c1c;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.signIn {
+  width: min(100%, 30rem);
+}

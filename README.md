@@ -18,9 +18,10 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - especificação revisável de PostgreSQL com isolamento multitenant e rollback, ainda sem banco conectado.
 - adaptador PostgreSQL de leitura selecionável no servidor, com memória como padrão seguro.
 - serviço interno de escrita para preço e disponibilidade, com autorização, versão e auditoria atômica.
-- autorização derivada de principal e membership persistida, ainda sem login ou fornecedor.
-- contrato portável de sessão verificada e vínculo externo, ainda sem SDK ou rota.
-- adaptador Clerk isolado para os futuros caminhos administrativos, ainda sem conta ou credencial conectada.
+- autorização derivada de principal e membership persistida no PostgreSQL;
+- contrato portável de sessão verificada e vínculo externo pseudônimo;
+- adaptador Clerk isolado para os caminhos administrativos, sem aceitar tenant ou papel externo;
+- entrada administrativa mínima em `/admin/sign-in`, com login, logout e revogação validados em desenvolvimento, ainda sem acesso ao catálogo.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -43,8 +44,8 @@ O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados
 - `tests/unit/`: invariantes de tenant, catálogo, carrinho e estrutura persistente;
 - `tests/visual/` e `tests/pwa/`: comportamento no navegador e operação offline.
 
-Banco remoto provisionado, autenticação, autorização externa, painel administrativo, API, analytics, pagamento online e integrações externas estão fora desta fase.
-Não existe superfície externa para os comandos administrativos: autenticação, painel e API continuam fora desta fase.
+Banco remoto provisionado, painel administrativo de catálogo, API administrativa, analytics, pagamento online e integrações externas estão fora desta fase.
+Não existe superfície externa para os comandos administrativos: a autenticação atual comprova somente a identidade e não concede acesso ao catálogo.
 
 Variações e adicionais podem ser selecionados em uma caixa de diálogo acessível. Antes da prévia, todas as linhas e valores são reconstruídos pelo catálogo atual. A mensagem pode ser copiada localmente, mas não abre WhatsApp, não solicita dados pessoais e não envia ou confirma um pedido.
 
