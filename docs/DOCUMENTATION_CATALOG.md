@@ -28,6 +28,7 @@
 | `docs/architecture/adr/0017-preco-administrativo-controlado.md` | Edição monetária em centavos com autorização, versão e auditoria | Aceito |
 | `docs/architecture/adr/0018-auditoria-administrativa-somente-leitura.md` | Consulta limitada da trilha do tenant derivado | Aceito |
 | `docs/architecture/adr/0019-conteudo-administrativo-controlado.md` | Edição limitada de nome e descrição com auditoria | Aceito |
+| `docs/architecture/adr/0020-categorias-administrativas-somente-leitura.md` | Revisão da estrutura de categorias do tenant derivado | Aceito |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |

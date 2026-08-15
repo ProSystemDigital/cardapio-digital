@@ -171,6 +171,47 @@
   font-weight: 700;
 }
 
+.categorySummary {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid rgba(16, 38, 29, 0.1);
+  border-radius: 1rem;
+  background: #f9fbfa;
+}
+
+.categoryHeader,
+.categoryList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.categoryHeader h3 {
+  margin: 0;
+}
+
+.categoryList {
+  display: grid;
+  gap: 0.65rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.categoryList li {
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(16, 38, 29, 0.1);
+}
+
+.categoryList span {
+  font-weight: 700;
+}
+
+.categoryList small {
+  color: #5e6f68;
+}
+
 .productList {
   display: grid;
   gap: 0.75rem;
@@ -351,6 +392,13 @@
   }
 
   .auditHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .categoryHeader,
+  .categoryList li {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.35rem;

@@ -82,6 +82,14 @@ export default async function AdminPage() {
     );
   }
 
+  const productCountByCategory = new Map<string, number>();
+  for (const product of catalog.products) {
+    productCountByCategory.set(
+      product.categoryId,
+      (productCountByCategory.get(product.categoryId) ?? 0) + 1,
+    );
+  }
+
   return (
     <main className={styles.page}>
       <section className={styles.panel} aria-labelledby="admin-title">
@@ -104,6 +112,29 @@ export default async function AdminPage() {
             </div>
             <span className={styles.catalogCount}>{catalog.products.length} produtos</span>
           </div>
+          <section className={styles.categorySummary} aria-labelledby="category-title">
+            <div className={styles.categoryHeader}>
+              <div>
+                <p className={styles.eyebrow}>Somente leitura</p>
+                <h3 id="category-title">Categorias</h3>
+              </div>
+              <span className={styles.catalogCount}>{catalog.categories.length} categorias</span>
+            </div>
+            <ol className={styles.categoryList}>
+              {catalog.categories.map((category, index) => {
+                const productCount = productCountByCategory.get(category.id) ?? 0;
+                return (
+                  <li key={category.id}>
+                    <span>{index + 1}. {category.name}</span>
+                    <small>{productCount} {productCount === 1 ? "produto" : "produtos"}</small>
+                  </li>
+                );
+              })}
+            </ol>
+            <p className={styles.readOnlyNotice}>
+              A ordem e os nomes das categorias ainda não podem ser alterados nesta fase.
+            </p>
+          </section>
           <ul className={styles.productList}>
             {catalog.products.map((product) => (
               <li className={styles.productItem} key={product.id}>

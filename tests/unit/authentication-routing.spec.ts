@@ -27,6 +27,9 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain("<AvailabilityForm");
   expect(page).toContain("<PriceForm");
   expect(page).toContain("<ContentForm");
+  expect(page).toContain("productCountByCategory");
+  expect(page).toContain("catalog.categories.map");
+  expect(page).toContain("A ordem e os nomes das categorias ainda não podem ser alterados");
   expect(page).toContain("loadAuthorizedCatalogAudit(identity.identity, tenantId)");
   expect(page).not.toMatch(/searchParams|params\s*:/);
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
