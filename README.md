@@ -88,6 +88,8 @@ Variáveis futuras devem ser documentadas em `.env.example` somente com placehol
 
 A validação PostgreSQL usa um banco local descartável e o executor documentado em `docs/operations/DATABASE_MIGRATIONS.md`. pgAdmin 4 é a interface administrativa escolhida; Neon permanece apenas como provedor remoto planejado, sem conexão nesta fase.
 
+O vínculo administrativo real de desenvolvimento usa um banco persistente separado e o executor `scripts/database/manage-local-admin-link.ps1`. Ele solicita a senha administrativa de forma oculta, aceita somente Clerk Development e grava a credencial aleatória do runtime apenas no `.env.local` ignorado.
+
 Sem variáveis, a aplicação continua usando o catálogo em memória. A seleção PostgreSQL exige `CATALOG_REPOSITORY=postgres` e `DATABASE_URL` somente no ambiente do servidor. Nunca versione a URL real.
 
 ## Governança

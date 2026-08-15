@@ -39,3 +39,14 @@ test("saída encerra explicitamente a sessão ativa e informa falhas", () => {
   expect(signOut).toContain('signOut({ sessionId, redirectUrl: "/admin/sign-in" })');
   expect(signOut).toContain('role="alert"');
 });
+
+test("provisionamento local não imprime identidade ou credencial", () => {
+  const executor = read("scripts/database/manage-local-admin-link.mjs");
+  const wrapper = read("scripts/database/manage-local-admin-link.ps1");
+  expect(wrapper).toContain('Read-Host "Senha local do PostgreSQL" -AsSecureString');
+  expect(wrapper).toContain("Remove-Item Env:\\CARDAPIO_DB_ADMIN_PASSWORD");
+  expect(executor).toContain("users.length !== 1");
+  expect(executor).toContain("[identity.issuer, identity.subject, principalId]");
+  expect(executor).not.toMatch(/console\.log\([^)]*(issuer|subject|password|databaseUrl)/i);
+  expect(executor).toContain('mode: 0o600');
+});

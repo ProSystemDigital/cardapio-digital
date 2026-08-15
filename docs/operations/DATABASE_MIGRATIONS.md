@@ -63,3 +63,22 @@ O gate da Fase 3.0 foi executado com sucesso em 2026-08-14. A conclusão confirm
 Na Fase 3.1, o gate aplica a migration 0005 e comprova que somente o par exato `(issuer, subject)` ativo, ligado a principal ativo, resolve um `principalId`. A tabela tem RLS habilitada sem política e todos os privilégios são revogados do runtime; somente a função estreita `resolve_external_principal_id`, executada pelo proprietário da migration com `search_path` fixo, pode ser chamada. O rollback remove 0005 antes da fundação de identidade.
 
 O gate da migration 0005 foi executado com sucesso em 2026-08-14. A conclusão confirmou resolução do vínculo ativo, negação de principal desabilitado, negação de vínculo revogado, migrations `down/up` e limpeza do papel descartável por `DROP ROLE`. Nenhum subject real, credencial Clerk ou fixture foi retido.
+
+## Provisionamento administrativo local controlado
+
+A Fase 3.3 possui um gate separado para o banco persistente `cardapio_digital_dev`. Ele aceita somente chaves Clerk Development, exige exatamente um usuário na instância, cria um runtime sem superusuário ou `BYPASSRLS` e grava a URL gerada apenas em `.env.local` ignorado. O terminal não imprime senha, `issuer`, `subject` ou UUID.
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action Provision
+```
+
+Após reiniciar `npm run dev`, o login deve mostrar identidade interna validada. A revogação e a reativação do mesmo vínculo são verificadas sem excluir o banco:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action Revoke
+.\scripts\database\manage-local-admin-link.ps1 -Action Activate
+```
+
+As três ações solicitam a senha administrativa local de forma oculta. O script recusa sobrescrever banco ou papel existentes e não concede tenant ou papel com base em claims Clerk; a membership `owner` é criada explicitamente para a fixture local e registrada em auditoria.
+
+O gate persistente foi aprovado em 2026-08-15. A evidência humana confirmou provisionamento, identidade interna validada, revogação com acesso negado e reativação com acesso restaurado. O `.env.local` permaneceu ignorado e nenhum segredo, `issuer`, `subject` ou UUID foi copiado para terminal, documentação ou commit.
