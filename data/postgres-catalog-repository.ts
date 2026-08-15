@@ -11,6 +11,11 @@ import type {
 import { validateCatalog } from "../domain/catalog-validation";
 import type { CatalogRepository } from "./catalog-repository";
 
+export type VersionedProduct = Product & { version: number };
+export type VersionedTenantCatalog = Omit<TenantCatalog, "products"> & {
+  products: readonly VersionedProduct[];
+};
+
 type Queryable = Pick<PoolClient, "query">;
 type ProductOptions = readonly [
   Map<string, FulfillmentMode[]>,
@@ -68,7 +73,7 @@ export class PostgresCatalogRepository implements CatalogRepository {
         throw new Error(`Catálogo persistido rejeitado: ${validationErrors.join(" ")}`);
       }
       await client.query("COMMIT");
-      return catalog;
+      return withoutVersions(catalog);
     } catch (error) {
       await client.query("ROLLBACK");
       throw error;
@@ -77,7 +82,7 @@ export class PostgresCatalogRepository implements CatalogRepository {
     }
   }
 
-  async findByTenantId(tenantId: string): Promise<TenantCatalog | null> {
+  async findByTenantId(tenantId: string): Promise<VersionedTenantCatalog | null> {
     const client = await this.pool.connect();
     try {
       await client.query("BEGIN READ ONLY");
@@ -98,7 +103,7 @@ export class PostgresCatalogRepository implements CatalogRepository {
   }
 }
 
-async function loadCatalog(client: Queryable, tenantId: string): Promise<TenantCatalog> {
+async function loadCatalog(client: Queryable, tenantId: string): Promise<VersionedTenantCatalog> {
   const [tenantResult, modesResult, hoursResult, categoriesResult, productsResult] =
     await Promise.all([
       client.query<{
@@ -126,9 +131,9 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<TenantC
       client.query<{
         id: string; tenant_id: string; category_id: string; name: string;
         description: string; base_price_in_cents: string; emoji: string;
-        tag: string | null; is_available: boolean;
+        tag: string | null; is_available: boolean; version: string;
       }>(`SELECT id, tenant_id, category_id, name, description,
-          base_price_in_cents, emoji, tag, is_available
+          base_price_in_cents, emoji, tag, is_available, version
         FROM products
         WHERE tenant_id = $1 AND archived_at IS NULL
         ORDER BY name`, [tenantId]),
@@ -150,7 +155,7 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<TenantC
     closesAt: hours.closes_at.slice(0, 5),
   }));
 
-  const products: Product[] = productsResult.rows.map((product) => ({
+  const products: VersionedProduct[] = productsResult.rows.map((product) => ({
     id: product.id,
     tenantId: product.tenant_id,
     categoryId: product.category_id,
@@ -160,6 +165,7 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<TenantC
     emoji: product.emoji,
     ...(product.tag ? { tag: product.tag } : {}),
     isAvailable: product.is_available,
+    version: integer(product.version, "version"),
     fulfillmentModes: productModes.get(product.id) ?? [],
     variations: variations.get(product.id),
     addonGroups: groups.get(product.id)?.map((group) => ({
@@ -250,4 +256,14 @@ function append<T>(map: Map<string, T[]>, key: string, value: T): void {
   const values = map.get(key) ?? [];
   values.push(value);
   map.set(key, values);
+}
+
+function withoutVersions(catalog: VersionedTenantCatalog): TenantCatalog {
+  return {
+    ...catalog,
+    products: catalog.products.map(({ version, ...product }) => {
+      void version;
+      return product;
+    }),
+  };
 }

@@ -102,3 +102,13 @@ Para o gate de catálogo administrativo somente leitura, conceda `SELECT` apenas
 O comando não concede `INSERT`, `UPDATE` ou `DELETE` e não altera identidade, vínculo ou membership. A RLS continua definindo o tenant visível na transação do servidor.
 
 O gate da Fase 3.5 foi aprovado em 2026-08-15. O banco descartável confirmou novamente `up/down/up`, RLS, isolamento e limpeza; o banco persistente exibiu somente o catálogo do tenant derivado, com um produto e sem controles ou privilégios de mutação.
+
+Para habilitar exclusivamente a mutação de disponibilidade da Fase 3.6 no banco persistente local:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogAvailabilityWrite
+```
+
+O comando concede somente `UPDATE` em `products.is_available`, `products.version` e `products.updated_at`, além de `INSERT` na auditoria. Ele não concede alteração de preço, leitura de identidade ou modificação da trilha existente.
+
+O gate da Fase 3.6 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a concessão mínima e a interface alterou a disponibilidade com confirmação explícita e retorno de auditoria concluída.

@@ -23,6 +23,7 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain('identity.kind === "denied"');
   expect(page).toContain("tenantAccess.length !== 1");
   expect(page).toContain("await loadDerivedTenantCatalog(tenantId)");
+  expect(page).toContain("<AvailabilityForm");
   expect(page).not.toMatch(/searchParams|params\s*:/);
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
   expect(signIn).toContain('fallbackRedirectUrl="/admin"');
@@ -54,6 +55,23 @@ test("provisionamento local não imprime identidade ou credencial", () => {
   expect(executor).not.toMatch(/console\.log\([^)]*(issuer|subject|password|databaseUrl)/i);
   expect(executor).toContain('mode: 0o600');
   expect(executor).toContain('action === "enablecatalogread"');
+  expect(executor).toContain('action === "enablecatalogavailabilitywrite"');
   expect(executor).toContain("GRANT SELECT ON TABLE");
+  expect(executor).toContain("GRANT UPDATE (is_available, version, updated_at)");
+  expect(executor).toContain("GRANT INSERT ON TABLE catalog_audit_events");
+  expect(executor).not.toContain("GRANT UPDATE (base_price_in_cents");
   expect(executor).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE).*readableTables/i);
+});
+
+test("mutação de disponibilidade deriva identidade e tenant novamente no servidor", () => {
+  const action = read("app/admin/actions.ts");
+  const form = read("app/admin/availability-form.tsx");
+  expect(action).toContain("await auth.protect()");
+  expect(action).toContain("await resolveCurrentIdentity()");
+  expect(action).toContain("await resolveCurrentTenantAccess(identity.identity)");
+  expect(action).toContain("access.length !== 1");
+  expect(action).not.toMatch(/formData\.get\(["'](?:tenantId|role|actorId)/);
+  expect(form).toContain('name="confirmed" required');
+  expect(form).toContain('name="expectedVersion"');
+  expect(form).toContain('name="isAvailable"');
 });

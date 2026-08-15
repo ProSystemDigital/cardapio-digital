@@ -18,29 +18,8 @@ export class PostgresAuthorizationRepository implements AuthorizationRepository 
     principalId: PrincipalId,
     tenantId: TenantId,
   ): Promise<PrincipalAccess | null> {
-    const client = await this.pool.connect();
-    try {
-      await client.query("BEGIN READ ONLY");
-      await client.query("SELECT set_config('app.principal_id', $1, true)", [principalId]);
-      const result = await client.query<{ role: "owner" | "manager" }>(
-        `SELECT membership.role
-           FROM tenant_memberships membership
-           JOIN principals principal ON principal.id = membership.principal_id
-          WHERE membership.principal_id = $1
-            AND membership.tenant_id = $2
-            AND membership.status = 'active'
-            AND principal.status = 'active'`,
-        [principalId, tenantId],
-      );
-      await client.query("COMMIT");
-      const row = result.rows[0];
-      return row ? { principalId, tenantId, role: row.role } : null;
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
+    const access = await this.listTenantAccess(principalId);
+    return access.find((entry) => entry.tenantId === tenantId) ?? null;
   }
 
   async resolvePlatformAccess(principalId: PrincipalId): Promise<PrincipalAccess | null> {

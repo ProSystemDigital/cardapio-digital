@@ -1,8 +1,10 @@
 import "server-only";
 
 import { Pool } from "pg";
-import type { TenantCatalog } from "../domain/catalog";
-import { PostgresCatalogRepository } from "./postgres-catalog-repository";
+import {
+  PostgresCatalogRepository,
+  type VersionedTenantCatalog,
+} from "./postgres-catalog-repository";
 
 let adminCatalogPool: Pool | null = null;
 
@@ -22,7 +24,7 @@ function getAdminCatalogPool(): Pool | null {
 
 export async function loadDerivedTenantCatalog(
   tenantId: string,
-): Promise<TenantCatalog | null> {
+): Promise<VersionedTenantCatalog | null> {
   const pool = getAdminCatalogPool();
   if (!pool) return null;
   return new PostgresCatalogRepository(pool).findByTenantId(tenantId);

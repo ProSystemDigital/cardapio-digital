@@ -36,11 +36,12 @@ test("reconstrói catálogo persistido pelo contrato atual", async () => {
       variations: [{ name: "Grande", priceDeltaInCents: 500 }],
       addonGroups: [{ name: "Extras", addons: [{ name: "Extra local", priceInCents: 300 }] }],
     });
+    expect(catalog?.products[0]).not.toHaveProperty("version");
     await expect(repository.findByTenantId(
       "30000000-0000-0000-0000-000000000003",
     )).resolves.toMatchObject({
       tenant: { slug: "catalogo-postgres" },
-      products: [{ name: "Prato local" }],
+      products: [{ name: "Prato local", version: 1 }],
     });
   } finally {
     await pool.end();
@@ -131,6 +132,15 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       productId: command.productId,
       version: 2,
     });
+    await expect(service.updateProduct(actor, {
+      tenantId: command.tenantId,
+      productId: command.productId,
+      expectedVersion: 2,
+      isAvailable: true,
+    })).resolves.toEqual({
+      productId: command.productId,
+      version: 3,
+    });
     await expect(service.updateProduct(actor, command)).rejects.toBeInstanceOf(
       CatalogConflictError,
     );
@@ -144,20 +154,23 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         [command.tenantId, command.productId],
       );
       const audit = await client.query<{ actor_role: string; changes: Record<string, unknown> }>(
-        "SELECT actor_role, changes FROM catalog_audit_events WHERE tenant_id = $1 AND entity_id = $2",
+        "SELECT actor_role, changes FROM catalog_audit_events WHERE tenant_id = $1 AND entity_id = $2 ORDER BY occurred_at, id",
         [command.tenantId, command.productId],
       );
       await client.query("COMMIT");
 
       expect(product.rows[0]).toEqual({
         base_price_in_cents: "2800",
-        is_available: false,
-        version: "2",
+        is_available: true,
+        version: "3",
       });
-      expect(audit.rows).toEqual([{ actor_role: "manager", changes: {
-        isAvailable: false,
-        priceInCents: 2800,
-      } }]);
+      expect(audit.rows).toEqual([
+        { actor_role: "manager", changes: {
+          isAvailable: false,
+          priceInCents: 2800,
+        } },
+        { actor_role: "manager", changes: { isAvailable: true } },
+      ]);
     } finally {
       client.release();
     }

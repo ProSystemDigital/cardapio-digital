@@ -249,6 +249,22 @@ async function enableCatalogRead() {
   console.log("Leitura local do catálogo administrativo habilitada.");
 }
 
+async function enableCatalogAvailabilityWrite() {
+  const database = new Client(adminConfig(databaseName));
+  await database.connect();
+  try {
+    await database.query(
+      `GRANT UPDATE (is_available, version, updated_at) ON TABLE products TO ${quoteIdentifier(runtimeRole)}`,
+    );
+    await database.query(
+      `GRANT INSERT ON TABLE catalog_audit_events TO ${quoteIdentifier(runtimeRole)}`,
+    );
+  } finally {
+    await database.end();
+  }
+  console.log("Mutação local de disponibilidade e auditoria habilitadas.");
+}
+
 const environment = parseEnvironment(await readFile(envPath, "utf8"));
 const identity = await resolveSingleDevelopmentIdentity(environment);
 
@@ -257,4 +273,5 @@ else if (action === "revoke") await changeLinkStatus(identity, "revoked");
 else if (action === "activate") await changeLinkStatus(identity, "active");
 else if (action === "upgrade") await upgradeAuthorization();
 else if (action === "enablecatalogread") await enableCatalogRead();
+else if (action === "enablecatalogavailabilitywrite") await enableCatalogAvailabilityWrite();
 else throw new Error("Ação local inválida.");

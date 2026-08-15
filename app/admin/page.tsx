@@ -5,6 +5,7 @@ import {
 } from "../../data/authentication.server";
 import { loadDerivedTenantCatalog } from "../../data/admin-catalog.server";
 import { SignOutButton } from "./sign-out-button";
+import { AvailabilityForm } from "./availability-form";
 import styles from "./admin.module.scss";
 
 export default async function AdminPage() {
@@ -88,7 +89,7 @@ export default async function AdminPage() {
         <section className={styles.catalog} aria-labelledby="catalog-title">
           <div className={styles.catalogHeader}>
             <div>
-              <p className={styles.eyebrow}>Somente leitura</p>
+              <p className={styles.eyebrow}>Mutação controlada</p>
               <h2 className={styles.catalogTitle} id="catalog-title">
                 {catalog.tenant.displayName}
               </h2>
@@ -111,11 +112,16 @@ export default async function AdminPage() {
                     })}
                   </strong>
                 </div>
+                <AvailabilityForm
+                  productId={product.id}
+                  version={product.version}
+                  isAvailable={product.isAvailable}
+                />
               </li>
             ))}
           </ul>
           <p className={styles.readOnlyNotice}>
-            Edições permanecem bloqueadas até o gate de mutação autorizada.
+            Somente a disponibilidade pode ser alterada. Preço e demais dados permanecem bloqueados.
           </p>
         </section>
         <div className={styles.actions}><SignOutButton /></div>

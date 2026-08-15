@@ -92,6 +92,13 @@
   line-height: 1.4;
 }
 
+.actionSuccess {
+  margin: 0.75rem 0 0;
+  color: #174b36;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
 .catalog {
   margin-top: 1.5rem;
   padding-top: 1.5rem;
@@ -133,10 +140,57 @@
 
 .productItem {
   align-items: flex-start;
+  flex-wrap: wrap;
   padding: 1rem;
   border: 1px solid rgba(16, 38, 29, 0.1);
   border-radius: 1rem;
   background: #fff;
+}
+
+.availabilityForm {
+  flex: 1 0 100%;
+  width: 100%;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(16, 38, 29, 0.1);
+}
+
+.confirmation {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: #456157;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.confirmation input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1rem;
+  accent-color: #174b36;
+}
+
+.secondaryButton {
+  min-height: 2.5rem;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid #174b36;
+  border-radius: 999px;
+  background: #fff;
+  color: #174b36;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondaryButton:focus-visible {
+  outline: 3px solid #d8a243;
+  outline-offset: 3px;
+}
+
+.secondaryButton:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .productItem p {

@@ -20,24 +20,30 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
       await client.query("BEGIN");
       await client.query("SELECT set_config('app.tenant_id', $1, true)", [command.tenantId]);
 
+      const parameters: Array<string | number | boolean> = [
+        command.tenantId,
+        command.productId,
+        command.expectedVersion,
+      ];
+      const updateFields: string[] = [];
+      if (command.priceInCents !== undefined) {
+        parameters.push(command.priceInCents);
+        updateFields.push(`base_price_in_cents = $${parameters.length}::bigint`);
+      }
+      if (command.isAvailable !== undefined) {
+        parameters.push(command.isAvailable);
+        updateFields.push(`is_available = $${parameters.length}::boolean`);
+      }
+      updateFields.push("version = version + 1", "updated_at = now()");
       const updated = await client.query<{ id: string; version: string }>(
         `UPDATE products
-          SET base_price_in_cents = COALESCE($4::bigint, base_price_in_cents),
-              is_available = COALESCE($5::boolean, is_available),
-              version = version + 1,
-              updated_at = now()
+          SET ${updateFields.join(", ")}
           WHERE tenant_id = $1
             AND id = $2
             AND version = $3
             AND archived_at IS NULL
           RETURNING id, version`,
-        [
-          command.tenantId,
-          command.productId,
-          command.expectedVersion,
-          command.priceInCents ?? null,
-          command.isAvailable ?? null,
-        ],
+        parameters,
       );
 
       const product = updated.rows[0];

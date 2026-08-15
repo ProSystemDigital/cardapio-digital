@@ -24,6 +24,7 @@
 | `docs/architecture/adr/0013-clerk-como-provedor-de-autenticacao.md` | Clerk, governança e estratégia de saída | Aceito com gates |
 | `docs/architecture/adr/0014-memberships-derivadas-por-funcao-estreita.md` | Derivação de tenant e papel sem leitura direta do runtime | Aceito para gate local |
 | `docs/architecture/adr/0015-catalogo-administrativo-somente-leitura.md` | Leitura administrativa pelo tenant derivado, sem mutações | Aceito para gate local |
+| `docs/architecture/adr/0016-disponibilidade-administrativa-controlada.md` | Mutação mínima com autorização renovada, versão e auditoria | Aceito |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |
