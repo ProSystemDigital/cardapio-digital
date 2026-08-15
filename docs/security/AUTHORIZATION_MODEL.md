@@ -20,4 +20,4 @@ Membership revogada, principal desabilitado, tenant diferente ou identidade inv�
 
 ## Estado desta fase
 
-Não existem login, cookie de sessão, middleware, endpoint administrativo, conta de usuário ou integração com provedor. As tabelas contêm somente UUIDs técnicos, estado, papéis e timestamps. A seleção de fornecedor será objeto da Fase 3.1.
+Existe login administrativo Clerk em desenvolvimento, mas ele comprova somente a identidade externa. A rota real falha fechada até que `(issuer, subject)` resolva um `principalId` interno ativo; mesmo após o vínculo, tenant e permissão continuam derivados das tabelas PostgreSQL. Não existe endpoint ou painel de gestão de acessos.

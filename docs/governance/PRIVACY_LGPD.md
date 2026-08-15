@@ -10,3 +10,5 @@ A fundação não solicita, transmite ou persiste dados pessoais. Busca, filtros
 As decisões por WhatsApp, entrega e administração indicam tratamento futuro, mas não autorizam sua implementação. Antes de habilitá-los, Produto e Engenharia devem definir controlador, operadores, dados mínimos por modalidade, finalidade, base legal, transparência, retenção, direitos do titular e controles de segurança. Números de telefone, endereços, nomes e histórico de pedidos não devem ser adicionados aos dados demonstrativos.
 
 Pagamento online e analytics exigem avaliação própria antes da adoção. Esta documentação não substitui validação jurídica.
+
+Uma conta administrativa real existe somente no Clerk Development para validar autenticação, logout e revogação. A aplicação não persiste dados cadastrais do perfil e ainda não grava o identificador pseudônimo real no PostgreSQL. Produção e ampliação de titulares continuam bloqueadas pela revisão humana do DPA, subprocessadores, transferência internacional, finalidade, retenção e direitos.

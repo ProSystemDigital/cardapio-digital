@@ -18,8 +18,18 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   const page = read("app/admin/page.tsx");
   const signIn = read("app/admin/sign-in/[[...sign-in]]/page.tsx");
   expect(page).toContain("await auth.protect()");
+  expect(page).toContain("await resolveCurrentIdentity()");
+  expect(page).toContain('identity.kind === "denied"');
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
   expect(signIn).toContain('fallbackRedirectUrl="/admin"');
+});
+
+test("resolução real falha fechada sem banco ou vínculo", () => {
+  const composition = read("data/authentication.server.ts");
+  expect(composition).toMatch(/^import "server-only";/);
+  expect(composition).toContain("if (!databaseUrl) return null");
+  expect(composition).toContain('return { kind: "denied" }');
+  expect(composition).not.toMatch(/userId|orgId|orgRole|tenantIds/);
 });
 
 test("saída encerra explicitamente a sessão ativa e informa falhas", () => {

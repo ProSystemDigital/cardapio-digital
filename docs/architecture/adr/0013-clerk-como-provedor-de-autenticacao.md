@@ -46,8 +46,8 @@ Fontes: `https://clerk.com/pricing`, `https://clerk.com/legal/dpa`, `https://cle
 
 O desenvolvimento local pode usar Hobby, mas produção com MFA obrigatório pressupõe Pro ou renegociação da decisão. A transferência internacional e a ausência de residência regional exigem avaliação LGPD humana antes de dados reais. Preços e limites devem ser reconfirmados na contratação.
 
-O gate PostgreSQL local do vínculo pseudônimo foi aprovado em 2026-08-14, incluindo vínculo ativo, principal desabilitado, revogação, isolamento do runtime e ciclo `up/down/up`. Login, logout e revogação de sessão Clerk real continuam como gate separado.
+O gate PostgreSQL local do vínculo pseudônimo foi aprovado em 2026-08-14, incluindo vínculo ativo, principal desabilitado, revogação, isolamento do runtime e ciclo `up/down/up`. Login, logout e revogação de sessão Clerk foram aprovados em 2026-08-15 na instância de desenvolvimento restrita. O vínculo pseudônimo real e a derivação de membership permanecem gates separados.
 
 ## Reversão
 
-Remover o adaptador, `proxy.ts`, pacote e placeholders. Como ainda não há conta conectada, chave ou dado real, a reversão atual é inteiramente local.
+Remover o adaptador, `proxy.ts`, pacote e placeholders; revogar as chaves locais, encerrar a instância de desenvolvimento e excluir o usuário de teste conforme a governança aplicável. Como nenhum vínculo real foi persistido no PostgreSQL, a reversão interna ainda não exige migração de identidade.
