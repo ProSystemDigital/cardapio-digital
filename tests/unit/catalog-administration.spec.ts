@@ -67,6 +67,7 @@ test("rejeita ator inválido, comando vazio, preço e versão inválidos", async
   for (const invalid of [
     { ...command, expectedVersion: 0 },
     { ...command, priceInCents: -1 },
+    { ...command, priceInCents: 100_000_000 },
     { tenantId, productId: command.productId, expectedVersion: 1 },
   ]) {
     await expect(service.updateProduct(actor, invalid)).rejects.toBeInstanceOf(

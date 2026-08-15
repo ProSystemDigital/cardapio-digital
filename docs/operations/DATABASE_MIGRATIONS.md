@@ -112,3 +112,13 @@ Para habilitar exclusivamente a mutação de disponibilidade da Fase 3.6 no banc
 O comando concede somente `UPDATE` em `products.is_available`, `products.version` e `products.updated_at`, além de `INSERT` na auditoria. Ele não concede alteração de preço, leitura de identidade ou modificação da trilha existente.
 
 O gate da Fase 3.6 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a concessão mínima e a interface alterou a disponibilidade com confirmação explícita e retorno de auditoria concluída.
+
+Para habilitar exclusivamente a edição de preço da Fase 3.7 no banco persistente local:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogPriceWrite
+```
+
+O comando concede `UPDATE` somente em `products.base_price_in_cents`, `products.version` e `products.updated_at`, além de garantir `INSERT` na auditoria. Ele não amplia permissões para conteúdo, categorias ou exclusão.
+
+O gate da Fase 3.7 foi aprovado em 2026-08-15. O ciclo descartável confirmou migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a concessão mínima e a interface persistiu e auditou o novo preço, seguida de revisão visual, funcional e arquitetural humana.

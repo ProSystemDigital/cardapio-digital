@@ -34,6 +34,8 @@ export class CatalogValidationError extends Error {}
 export class CatalogConflictError extends Error {}
 export class CatalogEntityNotFoundError extends Error {}
 
+export const MAX_PRODUCT_PRICE_IN_CENTS = 99_999_999;
+
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export function authorizeCatalogMutation(actor: CatalogActor, tenantId: TenantId): void {
@@ -62,8 +64,10 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
   }
   if (
     command.priceInCents !== undefined &&
-    (!Number.isSafeInteger(command.priceInCents) || command.priceInCents < 0)
+    (!Number.isSafeInteger(command.priceInCents) ||
+      command.priceInCents < 0 ||
+      command.priceInCents > MAX_PRODUCT_PRICE_IN_CENTS)
   ) {
-    throw new CatalogValidationError("Preço deve ser inteiro não negativo em centavos.");
+    throw new CatalogValidationError("Preço deve ser inteiro em centavos dentro do limite.");
   }
 }

@@ -154,6 +154,48 @@
   border-top: 1px solid rgba(16, 38, 29, 0.1);
 }
 
+.priceForm {
+  flex: 1 0 100%;
+  width: 100%;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(16, 38, 29, 0.1);
+}
+
+.priceField {
+  display: grid;
+  gap: 0.4rem;
+  color: #456157;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.priceInput {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: min(100%, 15rem);
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(16, 38, 29, 0.25);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: #10261d;
+}
+
+.priceInput:focus-within {
+  outline: 3px solid #d8a243;
+  outline-offset: 2px;
+}
+
+.priceInput input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
 .confirmation {
   display: flex;
   align-items: flex-start;

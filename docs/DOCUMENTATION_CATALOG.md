@@ -25,6 +25,7 @@
 | `docs/architecture/adr/0014-memberships-derivadas-por-funcao-estreita.md` | Derivação de tenant e papel sem leitura direta do runtime | Aceito para gate local |
 | `docs/architecture/adr/0015-catalogo-administrativo-somente-leitura.md` | Leitura administrativa pelo tenant derivado, sem mutações | Aceito para gate local |
 | `docs/architecture/adr/0016-disponibilidade-administrativa-controlada.md` | Mutação mínima com autorização renovada, versão e auditoria | Aceito |
+| `docs/architecture/adr/0017-preco-administrativo-controlado.md` | Edição monetária em centavos com autorização, versão e auditoria | Aceito |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |

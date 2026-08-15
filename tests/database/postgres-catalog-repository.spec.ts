@@ -141,6 +141,15 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       productId: command.productId,
       version: 3,
     });
+    await expect(service.updateProduct(actor, {
+      tenantId: command.tenantId,
+      productId: command.productId,
+      expectedVersion: 3,
+      priceInCents: 2900,
+    })).resolves.toEqual({
+      productId: command.productId,
+      version: 4,
+    });
     await expect(service.updateProduct(actor, command)).rejects.toBeInstanceOf(
       CatalogConflictError,
     );
@@ -160,9 +169,9 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       await client.query("COMMIT");
 
       expect(product.rows[0]).toEqual({
-        base_price_in_cents: "2800",
+        base_price_in_cents: "2900",
         is_available: true,
-        version: "3",
+        version: "4",
       });
       expect(audit.rows).toEqual([
         { actor_role: "manager", changes: {
@@ -170,6 +179,7 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
           priceInCents: 2800,
         } },
         { actor_role: "manager", changes: { isAvailable: true } },
+        { actor_role: "manager", changes: { priceInCents: 2900 } },
       ]);
     } finally {
       client.release();

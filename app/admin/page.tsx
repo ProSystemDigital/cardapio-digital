@@ -6,6 +6,7 @@ import {
 import { loadDerivedTenantCatalog } from "../../data/admin-catalog.server";
 import { SignOutButton } from "./sign-out-button";
 import { AvailabilityForm } from "./availability-form";
+import { PriceForm } from "./price-form";
 import styles from "./admin.module.scss";
 
 export default async function AdminPage() {
@@ -117,11 +118,16 @@ export default async function AdminPage() {
                   version={product.version}
                   isAvailable={product.isAvailable}
                 />
+                <PriceForm
+                  productId={product.id}
+                  version={product.version}
+                  priceInCents={product.priceInCents}
+                />
               </li>
             ))}
           </ul>
           <p className={styles.readOnlyNotice}>
-            Somente a disponibilidade pode ser alterada. Preço e demais dados permanecem bloqueados.
+            Disponibilidade e preço possuem confirmações independentes. Demais dados permanecem bloqueados.
           </p>
         </section>
         <div className={styles.actions}><SignOutButton /></div>
