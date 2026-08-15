@@ -6,6 +6,14 @@ import type { TenantId } from "../domain/catalog";
 export class PostgresAuthorizationRepository implements AuthorizationRepository {
   constructor(private readonly pool: Pool) {}
 
+  async listTenantAccess(principalId: PrincipalId): Promise<readonly PrincipalAccess[]> {
+    const result = await this.pool.query<{ tenant_id: TenantId; role: "owner" | "manager" }>(
+      "SELECT tenant_id, role FROM public.list_principal_tenant_access($1)",
+      [principalId],
+    );
+    return result.rows.map((row) => ({ principalId, tenantId: row.tenant_id, role: row.role }));
+  }
+
   async resolveTenantAccess(
     principalId: PrincipalId,
     tenantId: TenantId,

@@ -131,6 +131,7 @@ async function provision(identity) {
       "database/migrations/0003_catalog_writes.up.sql",
       "database/migrations/0004_identity_authorization.up.sql",
       "database/migrations/0005_external_identity_links.up.sql",
+      "database/migrations/0006_principal_tenant_access.up.sql",
       "database/tests/catalog-repository-fixture.sql",
     ]) {
       await database.query(await readSql(migration));
@@ -165,6 +166,7 @@ async function provision(identity) {
     await database.query(`GRANT USAGE ON SCHEMA public TO ${quoteIdentifier(runtimeRole)}`);
     await database.query("REVOKE ALL ON FUNCTION public.resolve_external_principal_id(text, text) FROM PUBLIC");
     await database.query(`GRANT EXECUTE ON FUNCTION public.resolve_external_principal_id(text, text) TO ${quoteIdentifier(runtimeRole)}`);
+    await database.query(`GRANT EXECUTE ON FUNCTION public.list_principal_tenant_access(uuid) TO ${quoteIdentifier(runtimeRole)}`);
     await updateLocalDatabaseUrl(runtimePassword);
   } catch (error) {
     try { await database.query("ROLLBACK"); } catch {}
@@ -201,10 +203,30 @@ async function changeLinkStatus(identity, status) {
   console.log(status === "revoked" ? "Vínculo local revogado." : "Vínculo local reativado.");
 }
 
+async function upgradeAuthorization() {
+  const database = new Client(adminConfig(databaseName));
+  await database.connect();
+  try {
+    const functionExists = await database.query(
+      "SELECT to_regprocedure('public.list_principal_tenant_access(uuid)') IS NOT NULL AS exists",
+    );
+    if (!functionExists.rows[0].exists) {
+      await database.query(await readSql("database/migrations/0006_principal_tenant_access.up.sql"));
+    }
+    await database.query(
+      `GRANT EXECUTE ON FUNCTION public.list_principal_tenant_access(uuid) TO ${quoteIdentifier(runtimeRole)}`,
+    );
+  } finally {
+    await database.end();
+  }
+  console.log("Derivação local de tenant e papel habilitada.");
+}
+
 const environment = parseEnvironment(await readFile(envPath, "utf8"));
 const identity = await resolveSingleDevelopmentIdentity(environment);
 
 if (action === "provision") await provision(identity);
 else if (action === "revoke") await changeLinkStatus(identity, "revoked");
 else if (action === "activate") await changeLinkStatus(identity, "active");
+else if (action === "upgrade") await upgradeAuthorization();
 else throw new Error("Ação local inválida.");

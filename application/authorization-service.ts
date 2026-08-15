@@ -15,6 +15,13 @@ export class AccessDeniedError extends Error {}
 export class AuthorizationService {
   constructor(private readonly repository: AuthorizationRepository) {}
 
+  async listTenantAccess(identity: TrustedIdentity): Promise<readonly PrincipalAccess[]> {
+    if (!isValidPrincipalId(identity.principalId)) {
+      throw new AccessDeniedError("Identidade confiável inválida.");
+    }
+    return this.repository.listTenantAccess(identity.principalId);
+  }
+
   async authorizeTenant(
     identity: TrustedIdentity,
     tenantId: TenantId,

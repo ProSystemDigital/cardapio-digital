@@ -21,3 +21,5 @@ Membership revogada, principal desabilitado, tenant diferente ou identidade inv�
 ## Estado desta fase
 
 Existe login administrativo Clerk em desenvolvimento, mas ele comprova somente a identidade externa. A rota real falha fechada até que `(issuer, subject)` resolva um `principalId` interno ativo; mesmo após o vínculo, tenant e permissão continuam derivados das tabelas PostgreSQL. Não existe endpoint ou painel de gestão de acessos.
+
+A listagem administrativa de memberships retorna somente `tenantId` e papel internos por função `SECURITY DEFINER` com execução restrita. Zero ou mais de uma membership bloqueiam o primeiro gate; nenhuma delas é inferida de parâmetro de rota, formulário ou claim externo.

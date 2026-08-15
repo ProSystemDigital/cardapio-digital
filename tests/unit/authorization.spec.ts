@@ -13,6 +13,11 @@ function authorizationRepository(
   platform = false,
 ): AuthorizationRepository {
   return {
+    async listTenantAccess(receivedPrincipalId) {
+      return tenantRole
+        ? [{ principalId: receivedPrincipalId, tenantId, role: tenantRole }]
+        : [];
+    },
     async resolveTenantAccess(receivedPrincipalId, receivedTenantId) {
       return tenantRole
         ? { principalId: receivedPrincipalId, tenantId: receivedTenantId, role: tenantRole }
@@ -99,6 +104,10 @@ test("identidade técnica inválida falha antes de consultar permissões", async
   let repositoryCalled = false;
   const repository = authorizationRepository("owner");
   const guardedRepository: AuthorizationRepository = {
+    async listTenantAccess(...args) {
+      repositoryCalled = true;
+      return repository.listTenantAccess(...args);
+    },
     async resolveTenantAccess(...args) {
       repositoryCalled = true;
       return repository.resolveTenantAccess(...args);
@@ -113,4 +122,13 @@ test("identidade técnica inválida falha antes de consultar permissões", async
     service.authorizeTenant({ principalId: "forjado" }, tenantId, "catalog.read"),
   ).rejects.toBeInstanceOf(AccessDeniedError);
   expect(repositoryCalled).toBe(false);
+});
+
+test("lista somente memberships internas para identidade válida", async () => {
+  const service = new AuthorizationService(authorizationRepository("owner"));
+  await expect(service.listTenantAccess({ principalId })).resolves.toEqual([
+    { principalId, tenantId, role: "owner" },
+  ]);
+  await expect(service.listTenantAccess({ principalId: "forjado" }))
+    .rejects.toBeInstanceOf(AccessDeniedError);
 });

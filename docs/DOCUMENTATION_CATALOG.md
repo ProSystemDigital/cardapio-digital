@@ -22,6 +22,7 @@
 | `docs/architecture/adr/0011-identidade-e-autorizacao-derivada.md` | Principal técnico, memberships e permissões derivadas | Aceito |
 | `docs/architecture/adr/0012-fronteira-de-autenticacao-e-vinculo-externo.md` | Sessão verificada e vínculo externo portável | Aceito |
 | `docs/architecture/adr/0013-clerk-como-provedor-de-autenticacao.md` | Clerk, governança e estratégia de saída | Aceito com gates |
+| `docs/architecture/adr/0014-memberships-derivadas-por-funcao-estreita.md` | Derivação de tenant e papel sem leitura direta do runtime | Aceito para gate local |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |

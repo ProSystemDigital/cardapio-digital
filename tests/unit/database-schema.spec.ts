@@ -21,6 +21,8 @@ const authorizationUp = readFileSync(resolve(migrationsDirectory, "0004_identity
 const authorizationDown = readFileSync(resolve(migrationsDirectory, "0004_identity_authorization.down.sql"), "utf8");
 const identityLinksUp = readFileSync(resolve(migrationsDirectory, "0005_external_identity_links.up.sql"), "utf8");
 const identityLinksDown = readFileSync(resolve(migrationsDirectory, "0005_external_identity_links.down.sql"), "utf8");
+const principalTenantAccessUp = readFileSync(resolve(migrationsDirectory, "0006_principal_tenant_access.up.sql"), "utf8");
+const principalTenantAccessDown = readFileSync(resolve(migrationsDirectory, "0006_principal_tenant_access.down.sql"), "utf8");
 const identityLinksFixture = readFileSync(
   resolve(process.cwd(), "database", "tests", "external-identity-fixture.sql"),
   "utf8",
@@ -103,6 +105,15 @@ test("vínculo externo expõe somente resolvedor estreito e reversível", () => 
   expect(identityLinksDown).toContain("DROP TABLE IF EXISTS external_identity_links");
   expect(identityLinksFixture).toContain("status, revoked_at");
   expect(identityLinksFixture).toContain("'revoked',\n    now()");
+});
+
+test("memberships do principal usam função estreita e reversível", () => {
+  expect(principalTenantAccessUp).toContain("CREATE FUNCTION public.list_principal_tenant_access");
+  expect(principalTenantAccessUp).toContain("SECURITY DEFINER");
+  expect(principalTenantAccessUp).toContain("membership.status = 'active'");
+  expect(principalTenantAccessUp).toContain("principal.status = 'active'");
+  expect(principalTenantAccessUp).toContain("REVOKE ALL ON FUNCTION public.list_principal_tenant_access(uuid) FROM PUBLIC");
+  expect(principalTenantAccessDown).toContain("DROP FUNCTION IF EXISTS public.list_principal_tenant_access(uuid)");
 });
 
 test("todas as tabelas negam acesso sem contexto de tenant", () => {

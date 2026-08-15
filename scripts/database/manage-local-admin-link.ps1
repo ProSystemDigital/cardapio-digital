@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet("Provision", "Revoke", "Activate")]
+  [ValidateSet("Provision", "Revoke", "Activate", "Upgrade")]
   [string]$Action = "Provision",
   [string]$HostName = "127.0.0.1",
   [int]$Port = 5432,

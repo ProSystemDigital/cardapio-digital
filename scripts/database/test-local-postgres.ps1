@@ -23,6 +23,8 @@ $authorizationUpMigration = Join-Path $repositoryRoot "database\migrations\0004_
 $authorizationDownMigration = Join-Path $repositoryRoot "database\migrations\0004_identity_authorization.down.sql"
 $identityLinksUpMigration = Join-Path $repositoryRoot "database\migrations\0005_external_identity_links.up.sql"
 $identityLinksDownMigration = Join-Path $repositoryRoot "database\migrations\0005_external_identity_links.down.sql"
+$principalTenantAccessUpMigration = Join-Path $repositoryRoot "database\migrations\0006_principal_tenant_access.up.sql"
+$principalTenantAccessDownMigration = Join-Path $repositoryRoot "database\migrations\0006_principal_tenant_access.down.sql"
 $isolationTest = Join-Path $repositoryRoot "database\tests\multitenant-isolation.sql"
 $repositoryFixture = Join-Path $repositoryRoot "database\tests\catalog-repository-fixture.sql"
 $authorizationFixture = Join-Path $repositoryRoot "database\tests\authorization-fixture.sql"
@@ -95,6 +97,7 @@ try {
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $principalTenantAccessUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $isolationTest)
   Invoke-PsqlTestDatabase -Arguments @("-f", $repositoryFixture)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationFixture)
@@ -112,6 +115,7 @@ try {
     Remove-Item Env:\DATABASE_TEST_URL -ErrorAction SilentlyContinue
   }
 
+  Invoke-PsqlTestDatabase -Arguments @("-f", $principalTenantAccessDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationDownMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesDownMigration)
@@ -128,6 +132,7 @@ try {
   Invoke-PsqlTestDatabase -Arguments @("-f", $writesUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $authorizationUpMigration)
   Invoke-PsqlTestDatabase -Arguments @("-f", $identityLinksUpMigration)
+  Invoke-PsqlTestDatabase -Arguments @("-f", $principalTenantAccessUpMigration)
   Write-Host "PostgreSQL local validado: up, RLS, isolamento, snapshots, down e novo up."
 }
 finally {

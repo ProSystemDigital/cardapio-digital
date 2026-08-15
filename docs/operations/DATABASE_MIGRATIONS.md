@@ -82,3 +82,13 @@ Após reiniciar `npm run dev`, o login deve mostrar identidade interna validada.
 As três ações solicitam a senha administrativa local de forma oculta. O script recusa sobrescrever banco ou papel existentes e não concede tenant ou papel com base em claims Clerk; a membership `owner` é criada explicitamente para a fixture local e registrada em auditoria.
 
 O gate persistente foi aprovado em 2026-08-15. A evidência humana confirmou provisionamento, identidade interna validada, revogação com acesso negado e reativação com acesso restaurado. O `.env.local` permaneceu ignorado e nenhum segredo, `issuer`, `subject` ou UUID foi copiado para terminal, documentação ou commit.
+
+Na Fase 3.4, aplique a migration incremental e a concessão estreita ao runtime persistente:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action Upgrade
+```
+
+O comando é idempotente para a função existente, não recria principal, membership ou vínculo e não concede leitura direta das tabelas de identidade. Após reiniciar o servidor, `/admin` deve informar um tenant autorizado e o papel `Proprietário` derivado do PostgreSQL.
+
+O gate da migration 0006 foi aprovado em 2026-08-15. O banco descartável confirmou `up/down/up`, RLS, isolamento e limpeza; o banco persistente confirmou exatamente um tenant e papel `owner` derivados pelo runtime sem aceitar claims externos.

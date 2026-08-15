@@ -19,7 +19,9 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   const signIn = read("app/admin/sign-in/[[...sign-in]]/page.tsx");
   expect(page).toContain("await auth.protect()");
   expect(page).toContain("await resolveCurrentIdentity()");
+  expect(page).toContain("await resolveCurrentTenantAccess(identity.identity)");
   expect(page).toContain('identity.kind === "denied"');
+  expect(page).toContain("tenantAccess.length !== 1");
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
   expect(signIn).toContain('fallbackRedirectUrl="/admin"');
 });

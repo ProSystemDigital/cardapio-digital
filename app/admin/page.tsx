@@ -1,5 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
-import { resolveCurrentIdentity } from "../../data/authentication.server";
+import {
+  resolveCurrentIdentity,
+  resolveCurrentTenantAccess,
+} from "../../data/authentication.server";
 import { SignOutButton } from "./sign-out-button";
 import styles from "./admin.module.scss";
 
@@ -26,16 +29,40 @@ export default async function AdminPage() {
     );
   }
 
+  const tenantAccess = await resolveCurrentTenantAccess(identity.identity);
+  if (tenantAccess.length !== 1) {
+    return (
+      <main className={styles.page}>
+        <section className={styles.panel} aria-labelledby="admin-title">
+          <p className={styles.eyebrow}>Ambiente administrativo</p>
+          <h1 className={styles.title} id="admin-title">Tenant administrativo indisponível</h1>
+          <p className={styles.description}>
+            A identidade interna está ativa, mas não possui exatamente uma membership
+            de tenant disponível para este gate controlado.
+          </p>
+          <p className={styles.deniedStatus} role="status">
+            Nenhum acesso ao catálogo foi concedido.
+          </p>
+          <div className={styles.actions}><SignOutButton /></div>
+        </section>
+      </main>
+    );
+  }
+
+  const roleLabel = tenantAccess[0].role === "owner" ? "Proprietário" : "Gerente";
+
   return (
     <main className={styles.page}>
       <section className={styles.panel} aria-labelledby="admin-title">
         <p className={styles.eyebrow}>Ambiente administrativo</p>
-        <h1 className={styles.title} id="admin-title">Identidade interna validada</h1>
+        <h1 className={styles.title} id="admin-title">Acesso administrativo derivado</h1>
         <p className={styles.description}>
-          A sessão Clerk foi vinculada a um principal ativo no PostgreSQL. O acesso ao
-          catálogo continuará bloqueado até a permissão do tenant ser derivada.
+          A sessão Clerk foi vinculada a um principal ativo e a membership foi derivada
+          exclusivamente do PostgreSQL.
         </p>
-        <p className={styles.status} role="status">Nenhum papel ou tenant foi aceito da sessão externa.</p>
+        <p className={styles.status} role="status">
+          Tenant autorizado: 1. Papel interno: {roleLabel}. Nenhum claim externo foi aceito.
+        </p>
         <div className={styles.actions}><SignOutButton /></div>
       </section>
     </main>

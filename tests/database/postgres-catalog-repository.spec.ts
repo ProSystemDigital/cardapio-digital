@@ -45,6 +45,13 @@ test("deriva memberships ativas e separa papel de plataforma", async () => {
   const pool = new Pool({ connectionString: databaseUrl, max: 1 });
   try {
     const service = new AuthorizationService(new PostgresAuthorizationRepository(pool));
+    await expect(service.listTenantAccess(
+      { principalId: "41000000-0000-4000-8000-000000000001" },
+    )).resolves.toEqual([{
+      principalId: "41000000-0000-4000-8000-000000000001",
+      tenantId: "30000000-0000-0000-0000-000000000003",
+      role: "owner",
+    }]);
     await expect(service.authorizeTenant(
       { principalId: "41000000-0000-4000-8000-000000000001" },
       "30000000-0000-0000-0000-000000000003",

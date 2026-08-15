@@ -23,6 +23,7 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - adaptador Clerk isolado para os caminhos administrativos, sem aceitar tenant ou papel externo;
 - entrada administrativa mínima em `/admin/sign-in`, com login, logout e revogação validados em desenvolvimento, ainda sem acesso ao catálogo.
 - rota `/admin` conectada ao resolvedor interno em modo de negação, sem provisionar automaticamente principal, tenant ou papel.
+- membership administrativa derivada por função PostgreSQL estreita, ainda sem comandos de catálogo expostos.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
