@@ -17,7 +17,8 @@
 | 3.2. Autenticação Clerk controlada | Concluída | Instância de desenvolvimento restrita; login, proteção, logout e revogação reais aprovados, sem aceitar tenant ou papel externo. |
 | 3.3. Vínculo autenticado ao principal interno | Concluída | Provisionamento persistente local e ciclo vínculo ativo, revogação, negação e reativação aprovados sem expor identificadores. |
 | 3.4. Tenant e papel derivados | Concluída | Migration, função estreita e gate persistente aprovados; um tenant e papel `owner` foram derivados exclusivamente do PostgreSQL. |
-| 3.5. Catálogo administrativo somente leitura | Planejada | Exibir o catálogo do tenant derivado sem aceitar escopo do navegador e sem expor mutações. |
+| 3.5. Catálogo administrativo somente leitura | Concluída | Leitura pelo tenant derivado, permissão mínima persistente e interface sem mutações aprovadas no gate PostgreSQL e na revisão humana. |
+| 3.6. Disponibilidade administrativa controlada | Planejada | Primeira mutação real com autorização interna renovada, versão otimista, auditoria transacional e confirmação explícita. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |

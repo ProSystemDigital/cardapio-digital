@@ -222,6 +222,33 @@ async function upgradeAuthorization() {
   console.log("Derivação local de tenant e papel habilitada.");
 }
 
+async function enableCatalogRead() {
+  const database = new Client(adminConfig(databaseName));
+  const readableTables = [
+    "tenants",
+    "tenant_operations",
+    "tenant_fulfillment_modes",
+    "business_hours",
+    "categories",
+    "products",
+    "product_fulfillment_modes",
+    "product_variations",
+    "addon_groups",
+    "addons",
+  ];
+  await database.connect();
+  try {
+    for (const table of readableTables) {
+      await database.query(
+        `GRANT SELECT ON TABLE ${quoteIdentifier(table)} TO ${quoteIdentifier(runtimeRole)}`,
+      );
+    }
+  } finally {
+    await database.end();
+  }
+  console.log("Leitura local do catálogo administrativo habilitada.");
+}
+
 const environment = parseEnvironment(await readFile(envPath, "utf8"));
 const identity = await resolveSingleDevelopmentIdentity(environment);
 
@@ -229,4 +256,5 @@ if (action === "provision") await provision(identity);
 else if (action === "revoke") await changeLinkStatus(identity, "revoked");
 else if (action === "activate") await changeLinkStatus(identity, "active");
 else if (action === "upgrade") await upgradeAuthorization();
+else if (action === "enablecatalogread") await enableCatalogRead();
 else throw new Error("Ação local inválida.");

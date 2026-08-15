@@ -92,3 +92,13 @@ Na Fase 3.4, aplique a migration incremental e a concessão estreita ao runtime 
 O comando é idempotente para a função existente, não recria principal, membership ou vínculo e não concede leitura direta das tabelas de identidade. Após reiniciar o servidor, `/admin` deve informar um tenant autorizado e o papel `Proprietário` derivado do PostgreSQL.
 
 O gate da migration 0006 foi aprovado em 2026-08-15. O banco descartável confirmou `up/down/up`, RLS, isolamento e limpeza; o banco persistente confirmou exatamente um tenant e papel `owner` derivados pelo runtime sem aceitar claims externos.
+
+Para o gate de catálogo administrativo somente leitura, conceda `SELECT` apenas às tabelas operacionais necessárias:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogRead
+```
+
+O comando não concede `INSERT`, `UPDATE` ou `DELETE` e não altera identidade, vínculo ou membership. A RLS continua definindo o tenant visível na transação do servidor.
+
+O gate da Fase 3.5 foi aprovado em 2026-08-15. O banco descartável confirmou novamente `up/down/up`, RLS, isolamento e limpeza; o banco persistente exibiu somente o catálogo do tenant derivado, com um produto e sem controles ou privilégios de mutação.

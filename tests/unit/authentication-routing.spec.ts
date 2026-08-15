@@ -22,6 +22,8 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain("await resolveCurrentTenantAccess(identity.identity)");
   expect(page).toContain('identity.kind === "denied"');
   expect(page).toContain("tenantAccess.length !== 1");
+  expect(page).toContain("await loadDerivedTenantCatalog(tenantId)");
+  expect(page).not.toMatch(/searchParams|params\s*:/);
   expect(page).not.toMatch(/userId|orgId|orgRole|permission/);
   expect(signIn).toContain('fallbackRedirectUrl="/admin"');
 });
@@ -51,4 +53,7 @@ test("provisionamento local não imprime identidade ou credencial", () => {
   expect(executor).toContain("[identity.issuer, identity.subject, principalId]");
   expect(executor).not.toMatch(/console\.log\([^)]*(issuer|subject|password|databaseUrl)/i);
   expect(executor).toContain('mode: 0o600');
+  expect(executor).toContain('action === "enablecatalogread"');
+  expect(executor).toContain("GRANT SELECT ON TABLE");
+  expect(executor).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE).*readableTables/i);
 });

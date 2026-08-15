@@ -76,6 +76,26 @@ export class PostgresCatalogRepository implements CatalogRepository {
       client.release();
     }
   }
+
+  async findByTenantId(tenantId: string): Promise<TenantCatalog | null> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN READ ONLY");
+      await client.query("SELECT set_config('app.tenant_id', $1, true)", [tenantId]);
+      const catalog = await loadCatalog(client, tenantId);
+      const validationErrors = validateCatalog(catalog);
+      if (validationErrors.length > 0) {
+        throw new Error(`Catálogo persistido rejeitado: ${validationErrors.join(" ")}`);
+      }
+      await client.query("COMMIT");
+      return catalog;
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
 }
 
 async function loadCatalog(client: Queryable, tenantId: string): Promise<TenantCatalog> {

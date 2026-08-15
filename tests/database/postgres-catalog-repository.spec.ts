@@ -36,6 +36,12 @@ test("reconstrói catálogo persistido pelo contrato atual", async () => {
       variations: [{ name: "Grande", priceDeltaInCents: 500 }],
       addonGroups: [{ name: "Extras", addons: [{ name: "Extra local", priceInCents: 300 }] }],
     });
+    await expect(repository.findByTenantId(
+      "30000000-0000-0000-0000-000000000003",
+    )).resolves.toMatchObject({
+      tenant: { slug: "catalogo-postgres" },
+      products: [{ name: "Prato local" }],
+    });
   } finally {
     await pool.end();
   }
