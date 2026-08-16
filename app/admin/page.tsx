@@ -10,6 +10,7 @@ import { AvailabilityForm } from "./availability-form";
 import { PriceForm } from "./price-form";
 import { ContentForm } from "./content-form";
 import { CategoryForm } from "./category-form";
+import { FulfillmentModesForm } from "./fulfillment-modes-form";
 import styles from "./admin.module.scss";
 
 const fulfillmentModeLabels = {
@@ -189,11 +190,17 @@ export default async function AdminPage() {
                   categoryId={product.categoryId}
                   categories={categoryOptions}
                 />
+                <FulfillmentModesForm
+                  productId={product.id}
+                  version={product.version}
+                  selectedModes={product.fulfillmentModes}
+                  tenantModes={catalog.tenant.fulfillmentModes}
+                />
               </li>
             ))}
           </ul>
           <p className={styles.readOnlyNotice}>
-            Disponibilidade, preço, conteúdo e categoria possuem confirmações independentes. Modalidades permanecem somente leitura.
+            Disponibilidade, preço, conteúdo, categoria e modalidades possuem confirmações independentes.
           </p>
         </section>
         <section className={styles.audit} aria-labelledby="audit-title">
@@ -232,6 +239,9 @@ export default async function AdminPage() {
                     {event.description !== undefined ? " Descrição pública atualizada." : null}
                     {event.categoryName !== undefined
                       ? ` Categoria definida como “${event.categoryName}”.`
+                      : null}
+                    {event.fulfillmentModes !== undefined
+                      ? ` Modalidades definidas como ${event.fulfillmentModes}.`
                       : null}
                   </p>
                   <span>Papel responsável: {event.actorRole === "owner" ? "Proprietário" : "Gerente"}</span>

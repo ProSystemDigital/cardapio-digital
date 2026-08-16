@@ -5,7 +5,7 @@ import { AuthorizedCatalogAdministrationService } from "../application/authorize
 import { AuthorizationService } from "../application/authorization-service";
 import { CatalogAdministrationService } from "../application/catalog-administration-service";
 import type { TrustedIdentity } from "../domain/authorization";
-import type { TenantId } from "../domain/catalog";
+import type { FulfillmentMode, TenantId } from "../domain/catalog";
 import type { CatalogMutationResult } from "../domain/catalog-administration";
 import { PostgresAuthorizationRepository } from "./postgres-authorization-repository";
 import { PostgresCatalogCommandRepository } from "./postgres-catalog-command-repository";
@@ -116,5 +116,27 @@ export async function updateDerivedProductCategory(input: {
     productId: input.productId,
     expectedVersion: input.expectedVersion,
     categoryId: input.categoryId,
+  });
+}
+
+export async function updateDerivedProductFulfillmentModes(input: {
+  identity: TrustedIdentity;
+  tenantId: TenantId;
+  productId: string;
+  expectedVersion: number;
+  fulfillmentModes: readonly FulfillmentMode[];
+}): Promise<CatalogMutationResult | null> {
+  const pool = getCommandPool();
+  if (!pool) return null;
+
+  const service = new AuthorizedCatalogAdministrationService(
+    new AuthorizationService(new PostgresAuthorizationRepository(pool)),
+    new CatalogAdministrationService(new PostgresCatalogCommandRepository(pool)),
+  );
+  return service.updateProduct(input.identity, {
+    tenantId: input.tenantId,
+    productId: input.productId,
+    expectedVersion: input.expectedVersion,
+    fulfillmentModes: input.fulfillmentModes,
   });
 }

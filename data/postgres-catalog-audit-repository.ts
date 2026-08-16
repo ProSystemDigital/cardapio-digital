@@ -59,6 +59,7 @@ function toCatalogAuditEvent(row: AuditRow): CatalogAuditEvent {
   const name = row.changes.name;
   const description = row.changes.description;
   const categoryName = row.changes.categoryName;
+  const fulfillmentModes = row.changes.fulfillmentModes;
   return {
     id: row.id,
     productName: row.product_name,
@@ -70,6 +71,7 @@ function toCatalogAuditEvent(row: AuditRow): CatalogAuditEvent {
     ...(typeof name === "string" ? { name } : {}),
     ...(typeof description === "string" ? { description } : {}),
     ...(typeof categoryName === "string" ? { categoryName } : {}),
+    ...(typeof fulfillmentModes === "string" ? { fulfillmentModes } : {}),
     occurredAt: new Date(row.occurred_at),
   };
 }

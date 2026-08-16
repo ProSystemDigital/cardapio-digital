@@ -92,3 +92,22 @@ test("aceita nome e descrição dentro dos limites", async () => {
   })).resolves.toEqual({ productId: command.productId, version: 2 });
   expect(spy.calls).toHaveLength(1);
 });
+
+test("exige conjunto único e não vazio de modalidades conhecidas", async () => {
+  const service = new CatalogAdministrationService(repositorySpy().repository);
+  for (const fulfillmentModes of [[], ["pickup", "pickup"], ["balcao"]]) {
+    await expect(service.updateProduct(actor, {
+      tenantId,
+      productId: command.productId,
+      expectedVersion: 1,
+      fulfillmentModes,
+    } as UpdateProductCommand)).rejects.toBeInstanceOf(CatalogValidationError);
+  }
+
+  await expect(service.updateProduct(actor, {
+    tenantId,
+    productId: command.productId,
+    expectedVersion: 1,
+    fulfillmentModes: ["pickup", "delivery"],
+  })).resolves.toEqual({ productId: command.productId, version: 2 });
+});

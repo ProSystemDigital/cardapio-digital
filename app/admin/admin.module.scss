@@ -412,6 +412,45 @@
   font-weight: 700;
 }
 
+.fulfillmentModesForm {
+  flex: 1 0 100%;
+  width: 100%;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(16, 38, 29, 0.1);
+}
+
+.fulfillmentModesForm fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fulfillmentModesForm legend {
+  margin-bottom: 0.55rem;
+  color: #173f30;
+  font-weight: 700;
+}
+
+.modeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.modeOptions label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #456157;
+  font-size: 0.9rem;
+}
+
+.modeOptions input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #174b36;
+}
+
 .readOnlyNotice {
   margin: 1rem 0 0;
   color: #5e4b2e;

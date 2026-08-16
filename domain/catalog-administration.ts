@@ -1,4 +1,4 @@
-import type { CategoryId, ProductId, TenantId, TenantRole } from "./catalog";
+import type { CategoryId, FulfillmentMode, ProductId, TenantId, TenantRole } from "./catalog";
 
 export type CatalogActor = {
   id: string;
@@ -15,6 +15,7 @@ export type UpdateProductCommand = {
   name?: string;
   description?: string;
   categoryId?: CategoryId;
+  fulfillmentModes?: readonly FulfillmentMode[];
 };
 
 export type CatalogAuditEntry = {
@@ -71,6 +72,7 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
     command.name === undefined &&
     command.description === undefined &&
     command.categoryId === undefined
+    && command.fulfillmentModes === undefined
   ) {
     throw new CatalogValidationError("Informe ao menos uma alteração do produto.");
   }
@@ -96,5 +98,16 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
   }
   if (command.categoryId !== undefined && !ENTITY_UUID_PATTERN.test(command.categoryId)) {
     throw new CatalogValidationError("Categoria de destino inválida.");
+  }
+  if (command.fulfillmentModes !== undefined) {
+    const modes = command.fulfillmentModes;
+    const allowedModes: readonly FulfillmentMode[] = ["dine_in", "pickup", "delivery"];
+    if (
+      modes.length === 0 ||
+      new Set(modes).size !== modes.length ||
+      modes.some((mode) => !allowedModes.includes(mode))
+    ) {
+      throw new CatalogValidationError("Modalidades do produto inválidas.");
+    }
   }
 }

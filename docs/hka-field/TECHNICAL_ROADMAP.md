@@ -25,6 +25,7 @@
 | 3.10. Categorias administrativas somente leitura | Concluída | Nomes, ordem e quantidade de produtos por categoria aprovados pelo tenant derivado, sem nova mutação ou privilégio. |
 | 3.11. Classificação administrativa controlada | Concluída | Movimento de produto para categoria existente aprovado com autorização renovada, versão, auditoria e privilégio mínimo. |
 | 3.12. Modalidades por produto somente leitura | Concluída | Mesa, retirada e entrega aprovadas por produto a partir do tenant derivado, sem nova mutação ou privilégio. |
+| 3.13. Modalidades por produto controladas | Concluída | Seleção não vazia entre modalidades habilitadas pelo tenant aprovada com autorização renovada, versão, auditoria e privilégio mínimo. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |

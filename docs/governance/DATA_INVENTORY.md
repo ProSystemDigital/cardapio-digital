@@ -26,6 +26,8 @@ A Fase 3.9 permite editar nome e descrição públicos e registra os novos texto
 
 A Fase 3.11 altera somente a referência técnica da categoria do produto. A auditoria apresentada registra o nome público da categoria de destino e omite seu UUID; nenhum dado pessoal é acrescentado.
 
+A Fase 3.13 altera somente modalidades operacionais públicas do produto. A auditoria registra seus rótulos públicos, sem UUID, identidade externa, contato ou dado pessoal adicional.
+
 A Fase 3.0 acrescenta principals, memberships e papéis de plataforma representados somente por UUID, estado, papel, versões e timestamps. Não há subject de fornecedor, nome, e-mail, telefone, senha, token ou cookie. O futuro vínculo com identidade externa exigirá atualização deste inventário antes da coleta.
 
 A Fase 3.1 especifica a persistência de `issuer` e `subject` pseudônimos, estado do vínculo e timestamps, exclusivamente para resolver o `principalId`. O gate usa valores fictícios e banco descartável; ainda não existe coleta real. A aplicação não copia nome, e-mail, telefone, senha, token ou organização do Clerk. Exclusão/revogação acompanhará o encerramento do acesso, ressalvada eventual evidência de auditoria com retenção própria.

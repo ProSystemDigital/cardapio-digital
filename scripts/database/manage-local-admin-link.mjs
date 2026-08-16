@@ -332,6 +332,25 @@ async function enableCatalogCategoryAssignmentWrite() {
   console.log("Mutação local de classificação e categoria fictícia de validação habilitadas.");
 }
 
+async function enableCatalogFulfillmentModesWrite() {
+  const database = new Client(adminConfig(databaseName));
+  await database.connect();
+  try {
+    await database.query(
+      `GRANT UPDATE (version, updated_at) ON TABLE products TO ${quoteIdentifier(runtimeRole)}`,
+    );
+    await database.query(
+      `GRANT INSERT, DELETE ON TABLE product_fulfillment_modes TO ${quoteIdentifier(runtimeRole)}`,
+    );
+    await database.query(
+      `GRANT INSERT ON TABLE catalog_audit_events TO ${quoteIdentifier(runtimeRole)}`,
+    );
+  } finally {
+    await database.end();
+  }
+  console.log("Mutação local de modalidades do produto habilitada.");
+}
+
 const environment = parseEnvironment(await readFile(envPath, "utf8"));
 const identity = await resolveSingleDevelopmentIdentity(environment);
 
@@ -345,4 +364,5 @@ else if (action === "enablecatalogpricewrite") await enableCatalogPriceWrite();
 else if (action === "enablecatalogauditread") await enableCatalogAuditRead();
 else if (action === "enablecatalogcontentwrite") await enableCatalogContentWrite();
 else if (action === "enablecatalogcategoryassignmentwrite") await enableCatalogCategoryAssignmentWrite();
+else if (action === "enablecatalogfulfillmentmodeswrite") await enableCatalogFulfillmentModesWrite();
 else throw new Error("Ação local inválida.");

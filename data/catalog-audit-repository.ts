@@ -9,6 +9,7 @@ export type CatalogAuditEvent = {
   name?: string;
   description?: string;
   categoryName?: string;
+  fulfillmentModes?: string;
   occurredAt: Date;
 };
 

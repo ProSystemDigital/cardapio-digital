@@ -186,6 +186,15 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       productId: command.productId,
       version: 6,
     });
+    await expect(service.updateProduct(actor, {
+      tenantId: command.tenantId,
+      productId: command.productId,
+      expectedVersion: 6,
+      fulfillmentModes: ["pickup"],
+    })).resolves.toEqual({
+      productId: command.productId,
+      version: 7,
+    });
     await expect(service.updateProduct(actor, command)).rejects.toBeInstanceOf(
       CatalogConflictError,
     );
@@ -202,6 +211,10 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         "SELECT actor_role, changes FROM catalog_audit_events WHERE tenant_id = $1 AND entity_id = $2 ORDER BY occurred_at, id",
         [command.tenantId, command.productId],
       );
+      const productModes = await client.query<{ mode: string }>(
+        "SELECT mode FROM product_fulfillment_modes WHERE tenant_id = $1 AND product_id = $2 ORDER BY mode",
+        [command.tenantId, command.productId],
+      );
       await client.query("COMMIT");
 
       expect(product.rows[0]).toEqual({
@@ -209,7 +222,7 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         description: "Descrição atualizada.",
         base_price_in_cents: "2900",
         is_available: true,
-        version: "6",
+        version: "7",
       });
       expect(audit.rows).toEqual([
         { actor_role: "manager", changes: {
@@ -220,14 +233,16 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         { actor_role: "manager", changes: { priceInCents: 2900 } },
         { actor_role: "manager", changes: { name: "Prato atualizado", description: "Descrição atualizada." } },
         { actor_role: "manager", changes: { categoryName: "Categoria de validação" } },
+        { actor_role: "manager", changes: { fulfillmentModes: "Retirada" } },
       ]);
+      expect(productModes.rows).toEqual([{ mode: "pickup" }]);
       const recentAudit = await new PostgresCatalogAuditRepository(pool)
         .listRecentByTenantId(command.tenantId, 20);
-      expect(recentAudit).toHaveLength(5);
+      expect(recentAudit).toHaveLength(6);
       expect(recentAudit[0]).toMatchObject({
         productName: "Prato atualizado",
         actorRole: "manager",
-        categoryName: "Categoria de validação",
+        fulfillmentModes: "Retirada",
       });
     } finally {
       client.release();

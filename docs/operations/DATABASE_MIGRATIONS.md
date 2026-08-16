@@ -152,3 +152,13 @@ Para habilitar a classificação do produto na Fase 3.11 no banco persistente lo
 O comando cria idempotentemente uma segunda categoria fictícia chamada `Categoria de validação` no tenant local e concede `UPDATE` somente em `products.category_id`, `products.version` e `products.updated_at`, além de garantir `INSERT` na auditoria. A categoria de destino precisa existir no mesmo tenant; a estrutura das categorias permanece somente leitura. Essa fixture existe apenas no banco de desenvolvimento e pode ser arquivada ou removida conscientemente após o gate.
 
 O gate da Fase 3.11 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots, mudança real de categoria auditada e `up/down/up`; o banco persistente confirmou a concessão mínima, a atualização das contagens e a revisão visual, funcional e arquitetural humana.
+
+Para habilitar a mutação limitada das modalidades por produto da Fase 3.13 no banco persistente local, execute conscientemente:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogFulfillmentModesWrite
+```
+
+O comando concede somente `UPDATE` em `products.version` e `products.updated_at`, `INSERT/DELETE` em `product_fulfillment_modes` e `INSERT` na auditoria. Ele não permite criar ou remover modalidades do tenant, alterar outras colunas do produto ou editar eventos existentes.
+
+O gate da Fase 3.13 foi aprovado em 2026-08-15. O banco descartável confirmou isolamento, conjunto não vazio, relação e auditoria atômicas e ciclo `up/down/up`; o banco persistente recebeu a concessão mínima e a interface passou pela revisão visual, funcional e arquitetural humana.

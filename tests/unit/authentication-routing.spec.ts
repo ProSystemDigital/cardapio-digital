@@ -28,6 +28,7 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain("<PriceForm");
   expect(page).toContain("<ContentForm");
   expect(page).toContain("<CategoryForm");
+  expect(page).toContain("<FulfillmentModesForm");
   expect(page).toContain("productCountByCategory");
   expect(page).toContain("catalog.categories.map");
   expect(page).toContain("A ordem e os nomes das categorias ainda não podem ser alterados");
@@ -71,11 +72,13 @@ test("provisionamento local não imprime identidade ou credencial", () => {
   expect(executor).toContain('action === "enablecatalogauditread"');
   expect(executor).toContain('action === "enablecatalogcontentwrite"');
   expect(executor).toContain('action === "enablecatalogcategoryassignmentwrite"');
+  expect(executor).toContain('action === "enablecatalogfulfillmentmodeswrite"');
   expect(executor).toContain("GRANT SELECT ON TABLE");
   expect(executor).toContain("GRANT UPDATE (is_available, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (base_price_in_cents, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (name, description, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (category_id, version, updated_at)");
+  expect(executor).toContain("GRANT INSERT, DELETE ON TABLE product_fulfillment_modes");
   expect(executor).toContain("Categoria de validação");
   expect(executor).toContain("GRANT INSERT ON TABLE catalog_audit_events");
   expect(executor).not.toContain("GRANT UPDATE (is_available, base_price_in_cents");
@@ -143,4 +146,23 @@ test("classificação de produto aceita somente categoria técnica e contexto de
   expect(form).toContain('name="confirmed" required');
   expect(repository).toContain("FROM categories WHERE tenant_id = $1 AND id = $2");
   expect(repository).toContain("categoryName");
+});
+
+test("modalidades do produto usam conjunto do tenant e contexto derivado", () => {
+  const page = read("app/admin/page.tsx");
+  const action = read("app/admin/actions.ts");
+  const form = read("app/admin/fulfillment-modes-form.tsx");
+  const repository = read("data/postgres-catalog-command-repository.ts");
+  expect(page).toContain("tenantModes={catalog.tenant.fulfillmentModes}");
+  expect(action).toContain("await updateDerivedProductFulfillmentModes");
+  expect(action).toContain('formData.getAll("fulfillmentModes")');
+  expect(action).not.toMatch(/formData\.get\(["'](?:tenantId|role|actorId)/);
+  expect(form).toContain('<fieldset>');
+  expect(form).toContain('name="fulfillmentModes"');
+  expect(form).toContain('name="confirmed" required');
+  expect(repository).toContain("FROM tenant_fulfillment_modes WHERE tenant_id = $1");
+  expect(repository).toContain("ANY($2::text[])");
+  expect(repository).toContain("unnest($3::text[])");
+  expect(repository).not.toContain("fulfillment_mode[]");
+  expect(repository).toContain("DELETE FROM product_fulfillment_modes");
 });

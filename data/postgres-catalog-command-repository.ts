@@ -7,6 +7,13 @@ import {
   type CatalogMutationResult,
   type UpdateProductCommand,
 } from "../domain/catalog-administration";
+import type { FulfillmentMode } from "../domain/catalog";
+
+const fulfillmentModeLabels: Record<FulfillmentMode, string> = {
+  dine_in: "Consumo em mesa",
+  pickup: "Retirada",
+  delivery: "Entrega",
+};
 
 export class PostgresCatalogCommandRepository implements CatalogCommandRepository {
   constructor(private readonly pool: Pool) {}
@@ -27,6 +34,15 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
       ];
       const updateFields: string[] = [];
       let categoryName: string | undefined;
+      if (command.fulfillmentModes !== undefined) {
+        const allowed = await client.query<{ mode: FulfillmentMode }>(
+          "SELECT mode FROM tenant_fulfillment_modes WHERE tenant_id = $1 AND mode = ANY($2::text[])",
+          [command.tenantId, command.fulfillmentModes],
+        );
+        if (allowed.rowCount !== command.fulfillmentModes.length) {
+          throw new CatalogEntityNotFoundError("Modalidade não habilitada no tenant.");
+        }
+      }
       if (command.categoryId !== undefined) {
         const category = await client.query<{ name: string }>(
           "SELECT name FROM categories WHERE tenant_id = $1 AND id = $2 AND archived_at IS NULL",
@@ -81,12 +97,27 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
         throw new CatalogEntityNotFoundError("Produto não encontrado no tenant.");
       }
 
+      if (command.fulfillmentModes !== undefined) {
+        await client.query(
+          "DELETE FROM product_fulfillment_modes WHERE tenant_id = $1 AND product_id = $2",
+          [command.tenantId, command.productId],
+        );
+        await client.query(
+          `INSERT INTO product_fulfillment_modes (tenant_id, product_id, mode)
+           SELECT $1, $2, unnest($3::text[])`,
+          [command.tenantId, command.productId, command.fulfillmentModes],
+        );
+      }
+
       const changes = {
         ...(command.priceInCents === undefined ? {} : { priceInCents: command.priceInCents }),
         ...(command.isAvailable === undefined ? {} : { isAvailable: command.isAvailable }),
         ...(command.name === undefined ? {} : { name: command.name }),
         ...(command.description === undefined ? {} : { description: command.description }),
         ...(categoryName === undefined ? {} : { categoryName }),
+        ...(command.fulfillmentModes === undefined
+          ? {}
+          : { fulfillmentModes: command.fulfillmentModes.map((mode) => fulfillmentModeLabels[mode]).join(", ") }),
       };
       await client.query(
         `INSERT INTO catalog_audit_events

@@ -4,7 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { AccessDeniedError } from "../../application/authorization-service";
 import type { TrustedIdentity } from "../../domain/authorization";
-import type { TenantId } from "../../domain/catalog";
+import type { FulfillmentMode, TenantId } from "../../domain/catalog";
 import {
   MAX_PRODUCT_PRICE_IN_CENTS,
   MAX_PRODUCT_DESCRIPTION_LENGTH,
@@ -18,6 +18,7 @@ import {
   updateDerivedProductCategory,
   updateDerivedProductContent,
   updateDerivedProductPrice,
+  updateDerivedProductFulfillmentModes,
 } from "../../data/admin-catalog-command.server";
 import {
   resolveCurrentIdentity,
@@ -32,9 +33,11 @@ export type AvailabilityActionState = {
 export type PriceActionState = AvailabilityActionState;
 export type ContentActionState = AvailabilityActionState;
 export type CategoryActionState = AvailabilityActionState;
+export type FulfillmentModesActionState = AvailabilityActionState;
 
 const PRODUCT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PRICE_PATTERN = /^\d{1,6}(?:[.,]\d{1,2})?$/;
+const FULFILLMENT_MODES: readonly FulfillmentMode[] = ["dine_in", "pickup", "delivery"];
 
 function parsePriceInCents(value: FormDataEntryValue | null): number | null {
   if (typeof value !== "string" || !PRICE_PATTERN.test(value)) return null;
@@ -288,4 +291,65 @@ export async function updateProductCategory(
 
   revalidatePath("/admin");
   return { status: "success", message: "Categoria atualizada e auditada." };
+}
+
+export async function updateProductFulfillmentModes(
+  _previousState: FulfillmentModesActionState,
+  formData: FormData,
+): Promise<FulfillmentModesActionState> {
+  await auth.protect();
+
+  if (formData.get("confirmed") !== "yes") {
+    return { status: "error", message: "Confirme conscientemente as modalidades." };
+  }
+
+  const productId = formData.get("productId");
+  const versionValue = formData.get("expectedVersion");
+  const expectedVersion = typeof versionValue === "string" ? Number(versionValue) : NaN;
+  const rawModes = formData.getAll("fulfillmentModes");
+  const fulfillmentModes = rawModes.filter(
+    (mode): mode is FulfillmentMode => typeof mode === "string" && FULFILLMENT_MODES.includes(mode as FulfillmentMode),
+  );
+  if (
+    typeof productId !== "string" ||
+    !PRODUCT_ID_PATTERN.test(productId) ||
+    !Number.isSafeInteger(expectedVersion) ||
+    expectedVersion < 1 ||
+    fulfillmentModes.length === 0 ||
+    fulfillmentModes.length !== rawModes.length ||
+    new Set(fulfillmentModes).size !== fulfillmentModes.length
+  ) {
+    return { status: "error", message: "Selecione ao menos uma modalidade válida." };
+  }
+
+  const context = await resolveMutationContext();
+  if ("status" in context) return context;
+
+  try {
+    const result = await updateDerivedProductFulfillmentModes({
+      identity: context.identity,
+      tenantId: context.tenantId,
+      productId,
+      expectedVersion,
+      fulfillmentModes,
+    });
+    if (!result) {
+      return { status: "error", message: "A persistência administrativa está indisponível." };
+    }
+  } catch (error) {
+    if (error instanceof CatalogConflictError) {
+      return { status: "error", message: "O produto mudou. Recarregue e confirme novamente." };
+    }
+    if (
+      error instanceof AccessDeniedError ||
+      error instanceof CatalogEntityNotFoundError ||
+      error instanceof CatalogValidationError
+    ) {
+      return { status: "error", message: "As modalidades foram recusadas com segurança." };
+    }
+    throw error;
+  }
+
+  revalidatePath("/admin");
+  return { status: "success", message: "Modalidades atualizadas e auditadas." };
 }
