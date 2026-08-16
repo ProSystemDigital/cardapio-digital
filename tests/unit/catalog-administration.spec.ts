@@ -71,6 +71,7 @@ test("rejeita ator inválido, comando vazio, preço, conteúdo e versão inváli
     { ...command, name: " " },
     { ...command, name: "x".repeat(121) },
     { ...command, description: "x".repeat(501) },
+    { ...command, categoryId: "categoria" },
     { tenantId, productId: command.productId, expectedVersion: 1 },
   ]) {
     await expect(service.updateProduct(actor, invalid)).rejects.toBeInstanceOf(

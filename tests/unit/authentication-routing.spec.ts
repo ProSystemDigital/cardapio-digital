@@ -27,6 +27,7 @@ test("página administrativa exige autenticação sem consumir papéis externos"
   expect(page).toContain("<AvailabilityForm");
   expect(page).toContain("<PriceForm");
   expect(page).toContain("<ContentForm");
+  expect(page).toContain("<CategoryForm");
   expect(page).toContain("productCountByCategory");
   expect(page).toContain("catalog.categories.map");
   expect(page).toContain("A ordem e os nomes das categorias ainda não podem ser alterados");
@@ -66,10 +67,13 @@ test("provisionamento local não imprime identidade ou credencial", () => {
   expect(executor).toContain('action === "enablecatalogpricewrite"');
   expect(executor).toContain('action === "enablecatalogauditread"');
   expect(executor).toContain('action === "enablecatalogcontentwrite"');
+  expect(executor).toContain('action === "enablecatalogcategoryassignmentwrite"');
   expect(executor).toContain("GRANT SELECT ON TABLE");
   expect(executor).toContain("GRANT UPDATE (is_available, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (base_price_in_cents, version, updated_at)");
   expect(executor).toContain("GRANT UPDATE (name, description, version, updated_at)");
+  expect(executor).toContain("GRANT UPDATE (category_id, version, updated_at)");
+  expect(executor).toContain("Categoria de validação");
   expect(executor).toContain("GRANT INSERT ON TABLE catalog_audit_events");
   expect(executor).not.toContain("GRANT UPDATE (is_available, base_price_in_cents");
   expect(executor).not.toMatch(/GRANT\s+(INSERT|UPDATE|DELETE).*readableTables/i);
@@ -124,4 +128,16 @@ test("edição de conteúdo limita campos e renova autorização no servidor", (
   expect(form).toContain('maxLength={500}');
   expect(form).toContain('name="confirmed" required');
   expect(form).toContain('name="expectedVersion"');
+});
+
+test("classificação de produto aceita somente categoria técnica e contexto derivado", () => {
+  const action = read("app/admin/actions.ts");
+  const form = read("app/admin/category-form.tsx");
+  const repository = read("data/postgres-catalog-command-repository.ts");
+  expect(action).toContain("await updateDerivedProductCategory");
+  expect(action).not.toMatch(/formData\.get\(["'](?:tenantId|role|actorId)/);
+  expect(form).toContain('name="categoryId" required');
+  expect(form).toContain('name="confirmed" required');
+  expect(repository).toContain("FROM categories WHERE tenant_id = $1 AND id = $2");
+  expect(repository).toContain("categoryName");
 });

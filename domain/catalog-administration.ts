@@ -1,4 +1,4 @@
-import type { ProductId, TenantId, TenantRole } from "./catalog";
+import type { CategoryId, ProductId, TenantId, TenantRole } from "./catalog";
 
 export type CatalogActor = {
   id: string;
@@ -14,6 +14,7 @@ export type UpdateProductCommand = {
   isAvailable?: boolean;
   name?: string;
   description?: string;
+  categoryId?: CategoryId;
 };
 
 export type CatalogAuditEntry = {
@@ -40,10 +41,11 @@ export const MAX_PRODUCT_PRICE_IN_CENTS = 99_999_999;
 export const MAX_PRODUCT_NAME_LENGTH = 120;
 export const MAX_PRODUCT_DESCRIPTION_LENGTH = 500;
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ACTOR_UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ENTITY_UUID_PATTERN = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 
 export function authorizeCatalogMutation(actor: CatalogActor, tenantId: TenantId): void {
-  if (!UUID_PATTERN.test(actor.id)) {
+  if (!ACTOR_UUID_PATTERN.test(actor.id)) {
     throw new CatalogAuthorizationError("Ator técnico válido é obrigatório.");
   }
   if (actor.role === "platform_admin") {
@@ -67,7 +69,8 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
     command.priceInCents === undefined &&
     command.isAvailable === undefined &&
     command.name === undefined &&
-    command.description === undefined
+    command.description === undefined &&
+    command.categoryId === undefined
   ) {
     throw new CatalogValidationError("Informe ao menos uma alteração do produto.");
   }
@@ -90,5 +93,8 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
     command.description.length > MAX_PRODUCT_DESCRIPTION_LENGTH
   ) {
     throw new CatalogValidationError("Descrição do produto inválida.");
+  }
+  if (command.categoryId !== undefined && !ENTITY_UUID_PATTERN.test(command.categoryId)) {
+    throw new CatalogValidationError("Categoria de destino inválida.");
   }
 }

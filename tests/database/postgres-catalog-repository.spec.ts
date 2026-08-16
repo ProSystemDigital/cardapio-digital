@@ -126,6 +126,22 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
     isAvailable: false,
   };
   try {
+    const fixtureClient = await pool.connect();
+    try {
+      await fixtureClient.query("BEGIN");
+      await fixtureClient.query("SELECT set_config('app.tenant_id', $1, true)", [actor.tenantIds[0]]);
+      await fixtureClient.query(
+        `INSERT INTO categories (tenant_id, id, slug, name, sort_order)
+         VALUES ($1, '31000000-0000-0000-0000-000000000004', 'validacao', 'Categoria de validação', 2)`,
+        [actor.tenantIds[0]],
+      );
+      await fixtureClient.query("COMMIT");
+    } catch (error) {
+      await fixtureClient.query("ROLLBACK");
+      throw error;
+    } finally {
+      fixtureClient.release();
+    }
     const service = new CatalogAdministrationService(
       new PostgresCatalogCommandRepository(pool),
     );
@@ -161,6 +177,15 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
       productId: command.productId,
       version: 5,
     });
+    await expect(service.updateProduct(actor, {
+      tenantId: command.tenantId,
+      productId: command.productId,
+      expectedVersion: 5,
+      categoryId: "31000000-0000-0000-0000-000000000004",
+    })).resolves.toEqual({
+      productId: command.productId,
+      version: 6,
+    });
     await expect(service.updateProduct(actor, command)).rejects.toBeInstanceOf(
       CatalogConflictError,
     );
@@ -184,7 +209,7 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         description: "Descrição atualizada.",
         base_price_in_cents: "2900",
         is_available: true,
-        version: "5",
+        version: "6",
       });
       expect(audit.rows).toEqual([
         { actor_role: "manager", changes: {
@@ -194,15 +219,15 @@ test("atualiza produto e auditoria atomicamente com concorrência otimista", asy
         { actor_role: "manager", changes: { isAvailable: true } },
         { actor_role: "manager", changes: { priceInCents: 2900 } },
         { actor_role: "manager", changes: { name: "Prato atualizado", description: "Descrição atualizada." } },
+        { actor_role: "manager", changes: { categoryName: "Categoria de validação" } },
       ]);
       const recentAudit = await new PostgresCatalogAuditRepository(pool)
         .listRecentByTenantId(command.tenantId, 20);
-      expect(recentAudit).toHaveLength(4);
+      expect(recentAudit).toHaveLength(5);
       expect(recentAudit[0]).toMatchObject({
         productName: "Prato atualizado",
         actorRole: "manager",
-        name: "Prato atualizado",
-        description: "Descrição atualizada.",
+        categoryName: "Categoria de validação",
       });
     } finally {
       client.release();

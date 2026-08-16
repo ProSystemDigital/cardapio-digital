@@ -310,6 +310,28 @@ async function enableCatalogContentWrite() {
   console.log("Mutação local de conteúdo do produto habilitada.");
 }
 
+async function enableCatalogCategoryAssignmentWrite() {
+  const database = new Client(adminConfig(databaseName));
+  await database.connect();
+  try {
+    await database.query(
+      `INSERT INTO categories (tenant_id, id, slug, name, sort_order)
+       VALUES ($1, '31000000-0000-0000-0000-000000000004', 'validacao-local', 'Categoria de validação', 2)
+       ON CONFLICT (tenant_id, id) DO NOTHING`,
+      [tenantId],
+    );
+    await database.query(
+      `GRANT UPDATE (category_id, version, updated_at) ON TABLE products TO ${quoteIdentifier(runtimeRole)}`,
+    );
+    await database.query(
+      `GRANT INSERT ON TABLE catalog_audit_events TO ${quoteIdentifier(runtimeRole)}`,
+    );
+  } finally {
+    await database.end();
+  }
+  console.log("Mutação local de classificação e categoria fictícia de validação habilitadas.");
+}
+
 const environment = parseEnvironment(await readFile(envPath, "utf8"));
 const identity = await resolveSingleDevelopmentIdentity(environment);
 
@@ -322,4 +344,5 @@ else if (action === "enablecatalogavailabilitywrite") await enableCatalogAvailab
 else if (action === "enablecatalogpricewrite") await enableCatalogPriceWrite();
 else if (action === "enablecatalogauditread") await enableCatalogAuditRead();
 else if (action === "enablecatalogcontentwrite") await enableCatalogContentWrite();
+else if (action === "enablecatalogcategoryassignmentwrite") await enableCatalogCategoryAssignmentWrite();
 else throw new Error("Ação local inválida.");

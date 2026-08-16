@@ -250,6 +250,13 @@
   border-top: 1px solid rgba(16, 38, 29, 0.1);
 }
 
+.categoryForm {
+  flex: 1 0 100%;
+  width: 100%;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(16, 38, 29, 0.1);
+}
+
 .contentField {
   display: grid;
   gap: 0.4rem;
@@ -260,7 +267,8 @@
 }
 
 .contentField input,
-.contentField textarea {
+.contentField textarea,
+.contentField select {
   width: 100%;
   padding: 0.65rem 0.7rem;
   border: 1px solid rgba(16, 38, 29, 0.25);
@@ -275,7 +283,8 @@
 }
 
 .contentField input:focus-visible,
-.contentField textarea:focus-visible {
+.contentField textarea:focus-visible,
+.contentField select:focus-visible {
   outline: 3px solid #d8a243;
   outline-offset: 2px;
 }

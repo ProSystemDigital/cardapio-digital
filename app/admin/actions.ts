@@ -15,6 +15,7 @@ import {
 } from "../../domain/catalog-administration";
 import {
   updateDerivedProductAvailability,
+  updateDerivedProductCategory,
   updateDerivedProductContent,
   updateDerivedProductPrice,
 } from "../../data/admin-catalog-command.server";
@@ -30,6 +31,7 @@ export type AvailabilityActionState = {
 
 export type PriceActionState = AvailabilityActionState;
 export type ContentActionState = AvailabilityActionState;
+export type CategoryActionState = AvailabilityActionState;
 
 const PRODUCT_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const PRICE_PATTERN = /^\d{1,6}(?:[.,]\d{1,2})?$/;
@@ -229,4 +231,61 @@ export async function updateProductContent(
 
   revalidatePath("/admin");
   return { status: "success", message: "Conteúdo atualizado e auditado." };
+}
+
+export async function updateProductCategory(
+  _previousState: CategoryActionState,
+  formData: FormData,
+): Promise<CategoryActionState> {
+  await auth.protect();
+
+  if (formData.get("confirmed") !== "yes") {
+    return { status: "error", message: "Confirme conscientemente a nova categoria." };
+  }
+
+  const productId = formData.get("productId");
+  const categoryId = formData.get("categoryId");
+  const versionValue = formData.get("expectedVersion");
+  const expectedVersion = typeof versionValue === "string" ? Number(versionValue) : NaN;
+  if (
+    typeof productId !== "string" ||
+    !PRODUCT_ID_PATTERN.test(productId) ||
+    typeof categoryId !== "string" ||
+    !PRODUCT_ID_PATTERN.test(categoryId) ||
+    !Number.isSafeInteger(expectedVersion) ||
+    expectedVersion < 1
+  ) {
+    return { status: "error", message: "A classificação solicitada é inválida." };
+  }
+
+  const context = await resolveMutationContext();
+  if ("status" in context) return context;
+
+  try {
+    const result = await updateDerivedProductCategory({
+      identity: context.identity,
+      tenantId: context.tenantId,
+      productId,
+      expectedVersion,
+      categoryId,
+    });
+    if (!result) {
+      return { status: "error", message: "A persistência administrativa está indisponível." };
+    }
+  } catch (error) {
+    if (error instanceof CatalogConflictError) {
+      return { status: "error", message: "O produto mudou. Recarregue e confirme novamente." };
+    }
+    if (
+      error instanceof AccessDeniedError ||
+      error instanceof CatalogEntityNotFoundError ||
+      error instanceof CatalogValidationError
+    ) {
+      return { status: "error", message: "A classificação foi recusada com segurança." };
+    }
+    throw error;
+  }
+
+  revalidatePath("/admin");
+  return { status: "success", message: "Categoria atualizada e auditada." };
 }

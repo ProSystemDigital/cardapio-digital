@@ -142,3 +142,13 @@ Para habilitar nome e descrição na Fase 3.9 no banco persistente local:
 O comando concede `UPDATE` somente em `products.name`, `products.description`, `products.version` e `products.updated_at`, além de garantir `INSERT` na auditoria. Criação, exclusão, categorias, imagens e demais colunas permanecem bloqueadas.
 
 O gate da Fase 3.9 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots e `up/down/up`; o banco persistente confirmou a alteração mínima de conteúdo e sua auditoria, seguida de revisão visual, funcional e arquitetural humana.
+
+Para habilitar a classificação do produto na Fase 3.11 no banco persistente local:
+
+```powershell
+.\scripts\database\manage-local-admin-link.ps1 -Action EnableCatalogCategoryAssignmentWrite
+```
+
+O comando cria idempotentemente uma segunda categoria fictícia chamada `Categoria de validação` no tenant local e concede `UPDATE` somente em `products.category_id`, `products.version` e `products.updated_at`, além de garantir `INSERT` na auditoria. A categoria de destino precisa existir no mesmo tenant; a estrutura das categorias permanece somente leitura. Essa fixture existe apenas no banco de desenvolvimento e pode ser arquivada ou removida conscientemente após o gate.
+
+O gate da Fase 3.11 foi aprovado em 2026-08-15. O ciclo descartável confirmou novamente migrations, RLS, isolamento, snapshots, mudança real de categoria auditada e `up/down/up`; o banco persistente confirmou a concessão mínima, a atualização das contagens e a revisão visual, funcional e arquitetural humana.

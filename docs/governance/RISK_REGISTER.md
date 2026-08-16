@@ -37,6 +37,6 @@
 | CD-33 | Produção operar sem MFA por limitação do plano | P0 | Bloqueado | Hobby serve apenas ao desenvolvimento; produção administrativa exige Pro com MFA ou decisão substituta equivalente. |
 | CD-34 | Auditoria crescer sem retenção ou expor identidade técnica desnecessária | P1 | Parcialmente mitigado | Interface limita 20 eventos e omite UUID e identidade externa; retenção, paginação e exportação permanecem bloqueadas até decisão de governança. |
 | CD-35 | Conteúdo administrativo armazenar texto excessivo, código ou dado pessoal | P1 | Parcialmente mitigado | Nome e descrição possuem limites no cliente, servidor e domínio; React escapa a renderização e o privilégio PostgreSQL é restrito. Orientação operacional e política de retenção ainda precisam acompanhar o uso real. |
-| CD-36 | Gestão de categorias misturar produtos entre tenants ou permitir alteração sem auditoria própria | P0 | Bloqueado para mutação | A Fase 3.10 apenas apresenta categorias e contagens derivadas da leitura RLS aprovada. Comandos de categoria permanecem bloqueados até contrato, auditoria e gate específicos. |
+| CD-36 | Gestão de categorias misturar produtos entre tenants ou permitir alteração sem auditoria própria | P0 | Parcialmente mitigado | A classificação verifica a categoria sob o tenant derivado, usa FK composta, versão e auditoria atômica. Criação, renomeação, ordenação, arquivamento e exclusão continuam bloqueados. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

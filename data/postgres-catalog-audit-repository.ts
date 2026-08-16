@@ -58,6 +58,7 @@ function toCatalogAuditEvent(row: AuditRow): CatalogAuditEvent {
   const isAvailable = row.changes.isAvailable;
   const name = row.changes.name;
   const description = row.changes.description;
+  const categoryName = row.changes.categoryName;
   return {
     id: row.id,
     productName: row.product_name,
@@ -68,6 +69,7 @@ function toCatalogAuditEvent(row: AuditRow): CatalogAuditEvent {
     ...(typeof isAvailable === "boolean" ? { isAvailable } : {}),
     ...(typeof name === "string" ? { name } : {}),
     ...(typeof description === "string" ? { description } : {}),
+    ...(typeof categoryName === "string" ? { categoryName } : {}),
     occurredAt: new Date(row.occurred_at),
   };
 }

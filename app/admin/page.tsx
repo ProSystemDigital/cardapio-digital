@@ -9,6 +9,7 @@ import { SignOutButton } from "./sign-out-button";
 import { AvailabilityForm } from "./availability-form";
 import { PriceForm } from "./price-form";
 import { ContentForm } from "./content-form";
+import { CategoryForm } from "./category-form";
 import styles from "./admin.module.scss";
 
 export default async function AdminPage() {
@@ -89,6 +90,7 @@ export default async function AdminPage() {
       (productCountByCategory.get(product.categoryId) ?? 0) + 1,
     );
   }
+  const categoryOptions = catalog.categories.map(({ id, name }) => ({ id, name }));
 
   return (
     <main className={styles.page}>
@@ -167,11 +169,17 @@ export default async function AdminPage() {
                   name={product.name}
                   description={product.description}
                 />
+                <CategoryForm
+                  productId={product.id}
+                  version={product.version}
+                  categoryId={product.categoryId}
+                  categories={categoryOptions}
+                />
               </li>
             ))}
           </ul>
           <p className={styles.readOnlyNotice}>
-            Disponibilidade, preço e conteúdo possuem confirmações independentes. Demais dados permanecem bloqueados.
+            Disponibilidade, preço, conteúdo e categoria possuem confirmações independentes. Demais dados permanecem bloqueados.
           </p>
         </section>
         <section className={styles.audit} aria-labelledby="audit-title">
@@ -208,6 +216,9 @@ export default async function AdminPage() {
                       : null}
                     {event.name !== undefined ? ` Nome definido como “${event.name}”.` : null}
                     {event.description !== undefined ? " Descrição pública atualizada." : null}
+                    {event.categoryName !== undefined
+                      ? ` Categoria definida como “${event.categoryName}”.`
+                      : null}
                   </p>
                   <span>Papel responsável: {event.actorRole === "owner" ? "Proprietário" : "Gerente"}</span>
                 </li>

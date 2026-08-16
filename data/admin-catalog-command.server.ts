@@ -96,3 +96,25 @@ export async function updateDerivedProductContent(input: {
     description: input.description,
   });
 }
+
+export async function updateDerivedProductCategory(input: {
+  identity: TrustedIdentity;
+  tenantId: TenantId;
+  productId: string;
+  expectedVersion: number;
+  categoryId: string;
+}): Promise<CatalogMutationResult | null> {
+  const pool = getCommandPool();
+  if (!pool) return null;
+
+  const service = new AuthorizedCatalogAdministrationService(
+    new AuthorizationService(new PostgresAuthorizationRepository(pool)),
+    new CatalogAdministrationService(new PostgresCatalogCommandRepository(pool)),
+  );
+  return service.updateProduct(input.identity, {
+    tenantId: input.tenantId,
+    productId: input.productId,
+    expectedVersion: input.expectedVersion,
+    categoryId: input.categoryId,
+  });
+}

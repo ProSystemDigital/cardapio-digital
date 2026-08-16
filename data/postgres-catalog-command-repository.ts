@@ -26,6 +26,17 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
         command.expectedVersion,
       ];
       const updateFields: string[] = [];
+      let categoryName: string | undefined;
+      if (command.categoryId !== undefined) {
+        const category = await client.query<{ name: string }>(
+          "SELECT name FROM categories WHERE tenant_id = $1 AND id = $2 AND archived_at IS NULL",
+          [command.tenantId, command.categoryId],
+        );
+        categoryName = category.rows[0]?.name;
+        if (!categoryName) {
+          throw new CatalogEntityNotFoundError("Categoria não encontrada no tenant.");
+        }
+      }
       if (command.priceInCents !== undefined) {
         parameters.push(command.priceInCents);
         updateFields.push(`base_price_in_cents = $${parameters.length}::bigint`);
@@ -41,6 +52,10 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
       if (command.description !== undefined) {
         parameters.push(command.description);
         updateFields.push(`description = $${parameters.length}::text`);
+      }
+      if (command.categoryId !== undefined) {
+        parameters.push(command.categoryId);
+        updateFields.push(`category_id = $${parameters.length}::uuid`);
       }
       updateFields.push("version = version + 1", "updated_at = now()");
       const updated = await client.query<{ id: string; version: string }>(
@@ -71,6 +86,7 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
         ...(command.isAvailable === undefined ? {} : { isAvailable: command.isAvailable }),
         ...(command.name === undefined ? {} : { name: command.name }),
         ...(command.description === undefined ? {} : { description: command.description }),
+        ...(categoryName === undefined ? {} : { categoryName }),
       };
       await client.query(
         `INSERT INTO catalog_audit_events

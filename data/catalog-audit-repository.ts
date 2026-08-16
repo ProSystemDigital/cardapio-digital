@@ -8,6 +8,7 @@ export type CatalogAuditEvent = {
   isAvailable?: boolean;
   name?: string;
   description?: string;
+  categoryName?: string;
   occurredAt: Date;
 };
 

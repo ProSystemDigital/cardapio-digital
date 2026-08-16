@@ -23,6 +23,7 @@
 | 3.8. Auditoria administrativa somente leitura | Concluída | Consulta limitada aprovada pelo tenant derivado, sem PII e sem capacidade de alterar ou excluir a trilha. |
 | 3.9. Conteúdo administrativo controlado | Concluída | Edição limitada de nome e descrição aprovada com autorização renovada, versão otimista, auditoria e privilégio mínimo. |
 | 3.10. Categorias administrativas somente leitura | Concluída | Nomes, ordem e quantidade de produtos por categoria aprovados pelo tenant derivado, sem nova mutação ou privilégio. |
+| 3.11. Classificação administrativa controlada | Concluída | Movimento de produto para categoria existente aprovado com autorização renovada, versão, auditoria e privilégio mínimo. |
 | 2. Catálogo administrável | Planejada | Persistência, disponibilidade, identidade visual e operação por tenant. |
 | 3. Identidade e administração | Planejada | Autenticação, proprietário, gerente, administrador da plataforma, autorização e auditoria. |
 | 4. Jornada de pedido | Planejada | Mesa, retirada e entrega; resumo e envio por WhatsApp com regras de privacidade. |
