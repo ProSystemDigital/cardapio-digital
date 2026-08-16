@@ -30,6 +30,7 @@
 | `docs/architecture/adr/0019-conteudo-administrativo-controlado.md` | Edição limitada de nome e descrição com auditoria | Aceito |
 | `docs/architecture/adr/0020-categorias-administrativas-somente-leitura.md` | Revisão da estrutura de categorias do tenant derivado | Aceito |
 | `docs/architecture/adr/0021-classificacao-administrativa-controlada.md` | Movimento de produto entre categorias existentes | Aceito |
+| `docs/architecture/adr/0022-modalidades-por-produto-somente-leitura.md` | Revisão das modalidades operacionais por produto | Aceito |
 | `docs/governance/RISK_REGISTER.md` | Riscos ativos | Atual |
 | `docs/governance/DATA_INVENTORY.md` | Dados tratados na fundação | Atual |
 | `docs/governance/PRIVACY_LGPD.md` | Limites de privacidade | Atual |

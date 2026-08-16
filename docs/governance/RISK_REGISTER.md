@@ -38,5 +38,6 @@
 | CD-34 | Auditoria crescer sem retenção ou expor identidade técnica desnecessária | P1 | Parcialmente mitigado | Interface limita 20 eventos e omite UUID e identidade externa; retenção, paginação e exportação permanecem bloqueadas até decisão de governança. |
 | CD-35 | Conteúdo administrativo armazenar texto excessivo, código ou dado pessoal | P1 | Parcialmente mitigado | Nome e descrição possuem limites no cliente, servidor e domínio; React escapa a renderização e o privilégio PostgreSQL é restrito. Orientação operacional e política de retenção ainda precisam acompanhar o uso real. |
 | CD-36 | Gestão de categorias misturar produtos entre tenants ou permitir alteração sem auditoria própria | P0 | Parcialmente mitigado | A classificação verifica a categoria sob o tenant derivado, usa FK composta, versão e auditoria atômica. Criação, renomeação, ordenação, arquivamento e exclusão continuam bloqueados. |
+| CD-37 | Alteração de modalidades permitir produto sem atendimento ou modalidade fora do tenant | P0 | Bloqueado para mutação | A Fase 3.12 apenas apresenta relações já validadas e isoladas por RLS. Escrita permanece bloqueada até contrato atômico, autorização, auditoria e gate próprios. |
 
 Riscos P0 bloqueiam a capacidade relacionada até existir decisão e evidência de mitigação.

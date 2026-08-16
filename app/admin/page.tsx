@@ -12,6 +12,12 @@ import { ContentForm } from "./content-form";
 import { CategoryForm } from "./category-form";
 import styles from "./admin.module.scss";
 
+const fulfillmentModeLabels = {
+  dine_in: "Consumo em mesa",
+  pickup: "Retirada",
+  delivery: "Entrega",
+} as const;
+
 export default async function AdminPage() {
   await auth.protect();
   const identity = await resolveCurrentIdentity();
@@ -153,6 +159,14 @@ export default async function AdminPage() {
                     })}
                   </strong>
                 </div>
+                <div className={styles.fulfillmentModes} aria-label="Modalidades habilitadas">
+                  <strong>Atendimento</strong>
+                  <ul>
+                    {product.fulfillmentModes.map((mode) => (
+                      <li key={mode}>{fulfillmentModeLabels[mode]}</li>
+                    ))}
+                  </ul>
+                </div>
                 <AvailabilityForm
                   productId={product.id}
                   version={product.version}
@@ -179,7 +193,7 @@ export default async function AdminPage() {
             ))}
           </ul>
           <p className={styles.readOnlyNotice}>
-            Disponibilidade, preço, conteúdo e categoria possuem confirmações independentes. Demais dados permanecem bloqueados.
+            Disponibilidade, preço, conteúdo e categoria possuem confirmações independentes. Modalidades permanecem somente leitura.
           </p>
         </section>
         <section className={styles.audit} aria-labelledby="audit-title">
