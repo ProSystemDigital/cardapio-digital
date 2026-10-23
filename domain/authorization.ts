@@ -6,7 +6,17 @@ export type TrustedIdentity = Readonly<{ principalId: PrincipalId }>;
 export type TenantPermission =
   | "catalog.read"
   | "catalog.product.update"
+  | "catalog.product.create"
+  | "catalog.product.archive"
+  | "catalog.category.update"
+  | "catalog.category.create"
+  | "catalog.category.archive"
+  | "catalog.image.update"
+  | "tenant.profile.update"
+  | "tenant.fulfillment_modes.update"
   | "tenant.operations.update"
+  | "tenant.privacy.update"
+  | "tenant.delivery_origin.update"
   | "tenant.settings.update"
   | "tenant.memberships.manage"
   | "tenant.audit.read";
@@ -31,7 +41,17 @@ const tenantPermissions: Readonly<Record<"owner" | "manager", ReadonlySet<Tenant
   owner: new Set([
     "catalog.read",
     "catalog.product.update",
+    "catalog.product.create",
+    "catalog.product.archive",
+    "catalog.category.update",
+    "catalog.category.create",
+    "catalog.category.archive",
+    "catalog.image.update",
+    "tenant.profile.update",
+    "tenant.fulfillment_modes.update",
     "tenant.operations.update",
+    "tenant.privacy.update",
+    "tenant.delivery_origin.update",
     "tenant.settings.update",
     "tenant.memberships.manage",
     "tenant.audit.read",
@@ -39,7 +59,14 @@ const tenantPermissions: Readonly<Record<"owner" | "manager", ReadonlySet<Tenant
   manager: new Set([
     "catalog.read",
     "catalog.product.update",
+    "catalog.product.create",
+    "catalog.category.update",
+    "catalog.category.create",
+    "catalog.image.update",
+    "tenant.profile.update",
+    "tenant.fulfillment_modes.update",
     "tenant.operations.update",
+    "tenant.delivery_origin.update",
     "tenant.audit.read",
   ]),
 };

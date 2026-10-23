@@ -4,7 +4,13 @@ import { useAuth, useClerk } from "@clerk/nextjs";
 import { useState } from "react";
 import styles from "./admin.module.scss";
 
-export function SignOutButton() {
+export function SignOutButton({
+  label = "Sair",
+  redirectUrl = "/login",
+}: {
+  label?: string;
+  redirectUrl?: string;
+} = {}) {
   const { sessionId } = useAuth();
   const { signOut } = useClerk();
   const [isPending, setIsPending] = useState(false);
@@ -17,7 +23,7 @@ export function SignOutButton() {
     setErrorMessage(null);
 
     try {
-      await signOut({ sessionId, redirectUrl: "/admin/sign-in" });
+      await signOut({ sessionId, redirectUrl });
     } catch {
       setErrorMessage("Não foi possível encerrar a sessão. Tente novamente.");
       setIsPending(false);
@@ -32,7 +38,7 @@ export function SignOutButton() {
         disabled={!sessionId || isPending}
         onClick={handleSignOut}
       >
-        {isPending ? "Encerrando sessão…" : "Sair com segurança"}
+        {isPending ? "Encerrando sessão…" : label}
       </button>
       {errorMessage ? (
         <p className={styles.actionError} role="alert">{errorMessage}</p>

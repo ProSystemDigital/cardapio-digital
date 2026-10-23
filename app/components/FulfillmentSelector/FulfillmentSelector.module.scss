@@ -44,8 +44,7 @@
     }
 
     &:has(input:focus-visible) {
-      outline: 3px solid #0a84ff;
-      outline-offset: 2px;
+      border-color: var(--leaf);
     }
   }
 }
@@ -54,6 +53,23 @@
   border-color: var(--leaf) !important;
   background: #edf4ec;
   color: var(--forest);
+}
+
+.selector .tableSelector {
+  clear: both;
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  cursor: default;
+
+  select {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 0.55rem;
+    padding: 0.65rem;
+    background: white;
+    color: var(--ink);
+  }
 }
 
 @media (max-width: 420px) {

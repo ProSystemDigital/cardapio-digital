@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import MenuExperience from "../../components/MenuExperience/MenuExperience";
 import { catalogRepository } from "../../../data/catalog-repository.server";
 
@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: TenantMenuPageProps): Promise
   }
 
   return {
-    title: `${catalog.tenant.displayName} | Cardápio digital`,
-    description: `Consulte o cardápio demonstrativo de ${catalog.tenant.displayName}.`,
+    title: `${catalog.tenant.shortName} | Cardápio digital`,
+    description: `Consulte o cardápio demonstrativo de ${catalog.tenant.shortName}.`,
   };
 }
 
@@ -31,6 +31,10 @@ export default async function TenantMenuPage({ params }: TenantMenuPageProps) {
   const catalog = await catalogRepository.findByTenantSlug(tenantSlug);
 
   if (!catalog) {
+    const slugs = await catalogRepository.listTenantSlugs();
+    if (tenantSlug === "mesa-viva" && slugs.length === 1) {
+      redirect(`/cardapio/${slugs[0]}`);
+    }
     notFound();
   }
 

@@ -5,7 +5,7 @@ export const mesaVivaCatalog = {
     id: "tenant-mesa-viva",
     slug: "mesa-viva",
     displayName: "Mesa Viva",
-    shortName: "MV",
+    shortName: "Mesa Viva",
     tagline: "cozinha de verdade",
     fulfillmentModes: ["dine_in", "pickup", "delivery"],
     paymentTiming: "on_fulfillment",
@@ -22,6 +22,7 @@ export const mesaVivaCatalog = {
       ],
       minimumOrderInCents: 3000,
       deliveryFeeInCents: 700,
+      diningTables: ["Salão principal · Mesa 01", "Salão principal · Mesa 02", "Salão principal · Mesa 03", "Varanda · Mesa 01"],
     },
   },
   categories: [
@@ -47,7 +48,7 @@ export const casaDoPortoCatalog = {
     id: "tenant-casa-do-porto",
     slug: "casa-do-porto",
     displayName: "Casa do Porto",
-    shortName: "CP",
+    shortName: "Casa do Porto",
     tagline: "sabores do litoral",
     fulfillmentModes: ["dine_in", "pickup"],
     paymentTiming: "on_fulfillment",
@@ -62,6 +63,7 @@ export const casaDoPortoCatalog = {
         { weekday: "sunday", opensAt: "12:00", closesAt: "20:00" },
       ],
       minimumOrderInCents: 2500,
+      diningTables: ["Salão principal · Mesa 01", "Salão principal · Mesa 02"],
     },
   },
   categories: [

@@ -15,6 +15,20 @@ const withSerwist = withSerwistInit({
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "6mb",
+    },
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+        pathname: "/catalog/tenants/**",
+      },
+    ],
+  },
   // Autoriza o host LAN usado para validar a aplicação em dispositivos reais.
   // Sem isso, o Next.js bloqueia HMR e outros recursos internos no modo dev.
   allowedDevOrigins: ["127.0.0.1", "192.168.18.111"],

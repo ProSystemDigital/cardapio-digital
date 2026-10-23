@@ -34,13 +34,30 @@ test("layout não cria rolagem horizontal nas viewports suportadas", async ({ pa
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.width);
 });
 
+test("mobile exibe o estabelecimento e adiciona ao carrinho sem randomUUID", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() => {
+    Object.defineProperty(Crypto.prototype, "randomUUID", {
+      configurable: true,
+      value: undefined,
+    });
+  });
+  await page.goto("/cardapio/mesa-viva");
+
+  await expect(page.getByLabel("Mesa Viva, início").getByText("Mesa Viva", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Adicionar Burrata da casa" }).click();
+  await expect(page.getByRole("button", { name: /Abrir carrinho com 1 itens/ })).toBeVisible();
+  await page.getByRole("button", { name: /Abrir carrinho com 1 itens/ }).click();
+  await expect(page.getByLabel("Carrinho").getByText("Burrata da casa")).toBeVisible();
+});
+
 test("resolve tenants por slug sem misturar seus produtos", async ({ page }) => {
   await page.goto("/cardapio/casa-do-porto");
 
   await expect(page.getByLabel("Casa do Porto, início")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Peixe grelhado" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Burger Mesa Viva" })).toHaveCount(0);
-  await expect(page.getByText("mesa · retirada", { exact: true })).toBeVisible();
+  await expect(page.getByText("na mesa · retirada", { exact: true })).toBeVisible();
 });
 
 test("apresenta estado seguro para tenant inexistente", async ({ page }) => {
@@ -50,10 +67,10 @@ test("apresenta estado seguro para tenant inexistente", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Estabelecimento não encontrado" })).toBeVisible();
 });
 
-test("a raiz redireciona para o catálogo demonstrativo padrão", async ({ page }) => {
+test("a raiz redireciona para o diretório público de cardápios", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page).toHaveURL(/\/cardapio\/mesa-viva$/);
+  await expect(page).toHaveURL(/\/cardapio$/);
 });
 
 test("personaliza, valida e edita uma linha sem aceitar preço da interface", async ({ page }) => {
@@ -99,10 +116,25 @@ test("tenant sem entrega expõe somente modalidades habilitadas", async ({ page 
   await page.getByRole("button", { name: "Adicionar Água de coco" }).click();
   await page.getByRole("button", { name: /Abrir carrinho com 1 itens/ }).click();
 
-  await expect(page.getByRole("radio", { name: /Mesa/ })).toBeVisible();
+  await expect(page.getByRole("radio", { name: /Na mesa/ })).toBeVisible();
   await expect(page.getByRole("radio", { name: /Retirada/ })).toBeVisible();
   await expect(page.getByRole("radio", { name: /Entrega/ })).toHaveCount(0);
   await expect(page.getByText(/Faltam R\$.*13,00/)).toBeVisible();
+});
+
+test("atendimento na mesa exige uma identificação configurada", async ({ page }) => {
+  await page.goto("/cardapio/mesa-viva");
+  await page.getByRole("button", { name: "Personalizar Burger Mesa Viva" }).click();
+  await page.getByRole("checkbox", { name: /Bacon/ }).check();
+  await page.getByRole("button", { name: "Adicionar ao carrinho" }).click();
+  await page.getByRole("button", { name: /Abrir carrinho com 1 itens/ }).click();
+  await page.getByRole("radio", { name: /Na mesa/ }).check();
+  const review = page.getByRole("button", { name: "Revisar prévia" });
+  await expect(review).toBeDisabled();
+  await page.getByLabel("Qual é a sua mesa?").selectOption("Salão principal · Mesa 02");
+  await expect(review).toBeEnabled();
+  await review.click();
+  await expect(page.getByRole("dialog", { name: "Prévia do pedido" }).getByText(/Mesa: Salão principal · Mesa 02/)).toBeVisible();
 });
 
 test("gera prévia local, copia com segurança e não navega externamente", async ({ page }) => {

@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import type { CatalogCommandRepository } from "./catalog-command-repository";
 import {
+  type ArchiveProductCommand,
   CatalogConflictError,
   CatalogEntityNotFoundError,
   type CatalogActor,
@@ -10,7 +11,7 @@ import {
 import type { FulfillmentMode } from "../domain/catalog";
 
 const fulfillmentModeLabels: Record<FulfillmentMode, string> = {
-  dine_in: "Consumo em mesa",
+  dine_in: "Na mesa",
   pickup: "Retirada",
   delivery: "Entrega",
 };
@@ -126,6 +127,43 @@ export class PostgresCatalogCommandRepository implements CatalogCommandRepositor
         [command.tenantId, actor.id, actor.role, command.productId, JSON.stringify(changes)],
       );
 
+      await client.query("COMMIT");
+      return { productId: product.id, version: Number(product.version) };
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async archiveProduct(actor: CatalogActor, command: ArchiveProductCommand): Promise<CatalogMutationResult> {
+    const client = await this.pool.connect();
+    try {
+      await client.query("BEGIN");
+      await client.query("SELECT set_config('app.tenant_id', $1, true)", [command.tenantId]);
+      const archived = await client.query<{ id: string; version: string }>(
+        `UPDATE products
+           SET archived_at = now(), is_available = false, version = version + 1, updated_at = now()
+         WHERE tenant_id = $1 AND id = $2 AND version = $3 AND archived_at IS NULL
+         RETURNING id, version`,
+        [command.tenantId, command.productId, command.expectedVersion],
+      );
+      const product = archived.rows[0];
+      if (!product) {
+        const existing = await client.query(
+          "SELECT version FROM products WHERE tenant_id = $1 AND id = $2 AND archived_at IS NULL",
+          [command.tenantId, command.productId],
+        );
+        if (existing.rows[0]) throw new CatalogConflictError("Produto foi alterado por outra operação.");
+        throw new CatalogEntityNotFoundError("Produto não encontrado no tenant.");
+      }
+      await client.query(
+        `INSERT INTO catalog_audit_events
+          (tenant_id, actor_id, actor_role, action, entity_type, entity_id, changes)
+         VALUES ($1, $2, $3, 'product.archived', 'product', $4, '{"isAvailable":false}'::jsonb)`,
+        [command.tenantId, actor.id, actor.role, command.productId],
+      );
       await client.query("COMMIT");
       return { productId: product.id, version: Number(product.version) };
     } catch (error) {

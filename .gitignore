@@ -63,3 +63,5 @@ id_ed25519
 
 # Operating system files
 Thumbs.db
+
+.env*

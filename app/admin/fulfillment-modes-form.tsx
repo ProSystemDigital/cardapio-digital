@@ -1,45 +1,72 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { FulfillmentMode } from "../../domain/catalog";
 import {
-  updateProductFulfillmentModes,
-  type FulfillmentModesActionState,
+  updateProductAvailabilityOptions,
+  type ProductAvailabilityOptionsActionState,
 } from "./actions";
 import styles from "./admin.module.scss";
 
-const initialState: FulfillmentModesActionState = { status: "idle", message: "" };
+const initialState: ProductAvailabilityOptionsActionState = { status: "idle", message: "" };
 const labels: Record<FulfillmentMode, string> = {
-  dine_in: "Consumo em mesa",
+  dine_in: "Na mesa",
   pickup: "Retirada",
   delivery: "Entrega",
 };
+const modeOrder: readonly FulfillmentMode[] = ["pickup", "delivery", "dine_in"];
 
 export function FulfillmentModesForm({
   productId,
   version,
+  isAvailable,
   selectedModes,
-  tenantModes,
 }: {
   productId: string;
   version: number;
+  isAvailable: boolean;
   selectedModes: readonly FulfillmentMode[];
   tenantModes: readonly FulfillmentMode[];
 }) {
-  const [state, action, pending] = useActionState(updateProductFulfillmentModes, initialState);
+  const [state, action, pending] = useActionState(updateProductAvailabilityOptions, initialState);
+  const [unavailable, setUnavailable] = useState(!isAvailable);
+  const [modes, setModes] = useState<readonly FulfillmentMode[]>(
+    isAvailable ? selectedModes : [],
+  );
+
+  function toggleMode(mode: FulfillmentMode, checked: boolean): void {
+    setUnavailable(false);
+    setModes((current) => checked
+      ? [...new Set([...current, mode])]
+      : current.filter((currentMode) => currentMode !== mode));
+  }
 
   return (
     <form action={action} className={styles.fulfillmentModesForm}>
       <input name="productId" type="hidden" value={productId} />
       <input name="expectedVersion" type="hidden" value={version} />
-      <fieldset>
-        <legend>Modalidades do produto</legend>
+      <fieldset aria-label="Disponibilidade do Produto">
         <div className={styles.modeOptions}>
-          {tenantModes.map((mode) => (
+          <label>
+            <input
+              checked={unavailable}
+              name="unavailable"
+              onChange={(event) => {
+                setUnavailable(event.currentTarget.checked);
+                if (event.currentTarget.checked) setModes([]);
+              }}
+              type="checkbox"
+              value="yes"
+            />
+            Não disponível
+          </label>
+          {modeOrder.map((mode) => (
             <label key={mode}>
               <input
-                defaultChecked={selectedModes.includes(mode)}
+                checked={!unavailable && modes.includes(mode)}
+                disabled={unavailable}
                 name="fulfillmentModes"
+                onChange={(event) => toggleMode(mode, event.currentTarget.checked)}
                 type="checkbox"
                 value={mode}
               />
@@ -48,12 +75,8 @@ export function FulfillmentModesForm({
           ))}
         </div>
       </fieldset>
-      <label className={styles.confirmation}>
-        <input name="confirmed" required type="checkbox" value="yes" />
-        Confirmo que o produto manterá ao menos uma modalidade de atendimento.
-      </label>
       <button className={styles.secondaryButton} disabled={pending} type="submit">
-        {pending ? "Salvando…" : "Salvar modalidades"}
+        {pending ? "Salvando…" : "Salvar opções"}
       </button>
       {state.message ? (
         <p

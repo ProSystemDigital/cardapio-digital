@@ -1,0 +1,116 @@
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 5vw, 4rem);
+  background: radial-gradient(circle at 80% 10%, rgb(200 242 105 / 18%), transparent 24%), var(--paper);
+}
+
+.panel {
+  width: min(100%, 58rem);
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--card);
+  box-shadow: 0 24px 70px rgb(16 38 29 / 10%);
+}
+
+.eyebrow,
+.options article > p:first-child {
+  color: var(--leaf);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.panel h1 {
+  margin: 0.4rem 0 0.75rem;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.045em;
+}
+
+.intro,
+.options article > p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.options article {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+
+.options h2 {
+  margin: 0.35rem 0 0.65rem;
+  font-size: 1.3rem;
+}
+
+.options a {
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: var(--forest);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.options article > p + a {
+  margin-top: 1.5rem;
+}
+
+.plansAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  background: #edf3e5;
+}
+
+.plansAction div,
+.plansAction span {
+  display: block;
+}
+
+.plansAction span {
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.plansAction a {
+  flex: none;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--forest);
+  border-radius: 999px;
+  color: var(--forest);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (max-width: 42rem) {
+  .options {
+    grid-template-columns: 1fr;
+  }
+
+  .plansAction {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

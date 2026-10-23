@@ -1,6 +1,7 @@
 import { Pool, type PoolClient } from "pg";
 import type {
   BusinessHours,
+  Category,
   FulfillmentMode,
   Product,
   ProductAddonGroup,
@@ -11,8 +12,16 @@ import type {
 import { validateCatalog } from "../domain/catalog-validation";
 import type { CatalogRepository } from "./catalog-repository";
 
-export type VersionedProduct = Product & { version: number };
-export type VersionedTenantCatalog = Omit<TenantCatalog, "products"> & {
+export type AdminCatalogImage = Readonly<{
+  publicUrl: string;
+  version: number;
+  altText?: string;
+}>;
+export type VersionedProduct = Product & { version: number; image?: AdminCatalogImage };
+export type VersionedCategory = Category & { version: number };
+export type VersionedTenantCatalog = Omit<TenantCatalog, "tenant" | "categories" | "products"> & {
+  tenant: TenantCatalog["tenant"] & { version: number; logo?: AdminCatalogImage };
+  categories: readonly VersionedCategory[];
   products: readonly VersionedProduct[];
 };
 
@@ -103,16 +112,29 @@ export class PostgresCatalogRepository implements CatalogRepository {
   }
 }
 
-async function loadCatalog(client: Queryable, tenantId: string): Promise<VersionedTenantCatalog> {
-  const [tenantResult, modesResult, hoursResult, categoriesResult, productsResult] =
+async function loadCatalog(
+  client: Queryable,
+  tenantId: string,
+): Promise<VersionedTenantCatalog> {
+  const diningTablesSchema = await client.query<{ available: boolean }>(`SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'tenant_operations'
+      AND column_name = 'dining_table_labels'
+  ) AS available`);
+  const diningTablesProjection = diningTablesSchema.rows[0]?.available
+    ? "o.dining_table_labels"
+    : "'{}'::text[] AS dining_table_labels";
+  const [tenantResult, modesResult, hoursResult, paymentMethodsResult, categoriesResult, productsResult] =
     [
       await client.query<{
         id: string; slug: string; display_name: string; short_name: string;
         tagline: string; payment_timing: "on_fulfillment"; order_channel: "whatsapp";
-        minimum_order_in_cents: string; delivery_fee_in_cents: string | null;
+        minimum_order_in_cents: string; delivery_fee_in_cents: string | null; version: string;
+        operations_version: string; whatsapp_number: string | null; maximum_delivery_distance_in_meters: number; dining_table_labels: string[];
       }>(`SELECT t.id, t.slug, t.display_name, t.short_name, t.tagline,
-          t.payment_timing, t.order_channel, o.minimum_order_in_cents,
-          o.delivery_fee_in_cents
+          t.payment_timing, t.order_channel, t.version, o.minimum_order_in_cents,
+          o.delivery_fee_in_cents, o.version AS operations_version, o.whatsapp_number,
+          o.maximum_delivery_distance_in_meters, ${diningTablesProjection}
         FROM tenants t
         JOIN tenant_operations o ON o.tenant_id = t.id
         WHERE t.id = $1 AND t.archived_at IS NULL`, [tenantId]),
@@ -124,8 +146,12 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
         "SELECT weekday, opens_at::text, closes_at::text FROM business_hours WHERE tenant_id = $1 ORDER BY weekday",
         [tenantId],
       ),
-      await client.query<{ id: string; tenant_id: string; name: string; sort_order: number }>(
-        "SELECT id, tenant_id, name, sort_order FROM categories WHERE tenant_id = $1 AND archived_at IS NULL ORDER BY sort_order, name",
+      await client.query<{ method: "pix" | "cash" | "credit_card" | "debit_card" }>(
+        "SELECT method FROM tenant_payment_methods WHERE tenant_id = $1 ORDER BY method",
+        [tenantId],
+      ),
+      await client.query<{ id: string; tenant_id: string; name: string; sort_order: number; version: string }>(
+        "SELECT id, tenant_id, name, sort_order, version FROM categories WHERE tenant_id = $1 AND archived_at IS NULL ORDER BY sort_order, name",
         [tenantId],
       ),
       await client.query<{
@@ -155,6 +181,24 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
     closesAt: hours.closes_at.slice(0, 5),
   }));
 
+  const logoResult = await client.query<{
+    object_key: string; public_url: string; storage_provider: string; media_type: string; version: string;
+  }>(
+    "SELECT object_key, public_url, storage_provider, media_type, version FROM tenant_profile_images WHERE tenant_id = $1",
+    [tenantId],
+  );
+  const productImagesResult = await client.query<{
+    product_id: string; object_key: string; public_url: string; storage_provider: string;
+    media_type: string; alt_text: string; version: string;
+  }>(
+    "SELECT product_id, object_key, public_url, storage_provider, media_type, alt_text, version FROM product_catalog_images WHERE tenant_id = $1",
+    [tenantId],
+  );
+  if (logoResult.rows[0]) validatePublicCatalogImageReference(logoResult.rows[0], tenantId, "logo");
+  for (const image of productImagesResult.rows) {
+    validatePublicCatalogImageReference(image, tenantId, `products/${image.product_id}`);
+  }
+  const productImages = new Map(productImagesResult.rows.map((image) => [image.product_id, image]));
   const products: VersionedProduct[] = productsResult.rows.map((product) => ({
     id: product.id,
     tenantId: product.tenant_id,
@@ -166,6 +210,13 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
     ...(product.tag ? { tag: product.tag } : {}),
     isAvailable: product.is_available,
     version: integer(product.version, "version"),
+    ...(productImages.get(product.id) ? {
+      image: {
+        publicUrl: productImages.get(product.id)!.public_url,
+        altText: productImages.get(product.id)!.alt_text,
+        version: integer(productImages.get(product.id)!.version, "product_image.version"),
+      },
+    } : {}),
     fulfillmentModes: productModes.get(product.id) ?? [],
     variations: variations.get(product.id),
     addonGroups: groups.get(product.id)?.map((group) => ({
@@ -181,15 +232,27 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
       displayName: tenant.display_name,
       shortName: tenant.short_name,
       tagline: tenant.tagline,
+      version: integer(tenant.version, "tenant.version"),
+      ...(logoResult.rows[0] ? {
+        logo: {
+          publicUrl: logoResult.rows[0].public_url,
+          version: integer(logoResult.rows[0].version, "tenant_logo.version"),
+        },
+      } : {}),
       fulfillmentModes: modesResult.rows.map(({ mode }) => mode),
       paymentTiming: tenant.payment_timing,
       orderChannel: tenant.order_channel,
       operations: {
+        version: integer(tenant.operations_version, "tenant_operations.version"),
         businessHours,
         minimumOrderInCents: integer(tenant.minimum_order_in_cents, "minimum_order_in_cents"),
         ...(tenant.delivery_fee_in_cents === null
           ? {}
           : { deliveryFeeInCents: integer(tenant.delivery_fee_in_cents, "delivery_fee_in_cents") }),
+        ...(tenant.whatsapp_number ? { whatsappNumber: tenant.whatsapp_number } : {}),
+        maximumDeliveryDistanceInMeters: tenant.maximum_delivery_distance_in_meters,
+        diningTables: tenant.dining_table_labels,
+        paymentMethods: paymentMethodsResult.rows.map(({ method }) => method),
       },
     },
     categories: categoriesResult.rows.map((category) => ({
@@ -197,6 +260,7 @@ async function loadCatalog(client: Queryable, tenantId: string): Promise<Version
       tenantId: category.tenant_id,
       name: category.name,
       sortOrder: category.sort_order,
+      version: integer(category.version, "category.version"),
     })),
     products,
   };
@@ -259,11 +323,55 @@ function append<T>(map: Map<string, T[]>, key: string, value: T): void {
 }
 
 function withoutVersions(catalog: VersionedTenantCatalog): TenantCatalog {
+  const { version: tenantVersion, logo, ...tenant } = catalog.tenant;
+  void tenantVersion;
   return {
     ...catalog,
-    products: catalog.products.map(({ version, ...product }) => {
+    tenant: {
+      ...tenant,
+      ...(logo ? { logo: { publicUrl: logo.publicUrl } } : {}),
+    },
+    categories: catalog.categories.map(({ version, ...category }) => {
       void version;
-      return product;
+      return category;
+    }),
+    products: catalog.products.map(({ version, image, ...product }) => {
+      void version;
+      return {
+        ...product,
+        ...(image?.altText ? { image: { publicUrl: image.publicUrl, altText: image.altText } } : {}),
+      };
     }),
   };
+}
+
+export function validatePublicCatalogImageReference(
+  image: Readonly<{ object_key: string; public_url: string; storage_provider: string; media_type: string }>,
+  tenantId: string,
+  targetPath: string,
+): void {
+  const expectedPrefix = `catalog/tenants/${tenantId}/${targetPath}/`;
+  const objectName = image.object_key.startsWith(expectedPrefix)
+    ? image.object_key.slice(expectedPrefix.length)
+    : "";
+  if (
+    image.storage_provider !== "vercel_blob" ||
+    image.media_type !== "image/webp" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.webp$/i.test(objectName)
+  ) {
+    throw new Error("Referência pública de imagem fora do namespace do catálogo.");
+  }
+  let url: URL;
+  try {
+    url = new URL(image.public_url);
+  } catch {
+    throw new Error("URL pública de imagem inválida.");
+  }
+  if (
+    url.protocol !== "https:" ||
+    !url.hostname.endsWith(".public.blob.vercel-storage.com") ||
+    decodeURIComponent(url.pathname.slice(1)) !== image.object_key
+  ) {
+    throw new Error("URL pública de imagem fora do armazenamento aprovado.");
+  }
 }

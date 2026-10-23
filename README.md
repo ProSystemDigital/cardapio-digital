@@ -5,10 +5,11 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 ## Escopo atual
 
 - identidade, modalidades e catálogo configuráveis por tenant;
-- resolução pública do estabelecimento por `/cardapio/[tenantSlug]`;
+- diretório público em `/cardapio` e resolução de cada estabelecimento por `/cardapio/[tenantSlug]`;
 - vitrine por categoria e busca por nome e descrição;
 - carrinho local por linhas configuradas, com edição, quantidades e subtotal em centavos;
 - seleção de modalidade e cotação local com mínimo, taxa e total;
+- etapa administrativa 8 Mesas, com identificação por ambiente e seleção obrigatória para atendimento “Na mesa”;
 - rascunho imutável e prévia textual copiável, sem envio externo;
 - regras de domínio puras e testadas;
 - horários, modalidades por produto, variações e adicionais demonstrativos;
@@ -32,7 +33,32 @@ Fundação de uma aplicação SaaS multitenant de cardápio digital, desenvolvid
 - revisão administrativa somente leitura das categorias, sua ordem e quantidade de produtos.
 - classificação administrativa de produtos em categorias existentes, com isolamento, versão e auditoria.
 - seleção administrativa das modalidades existentes do tenant por produto, sem conjunto vazio e com auditoria atômica.
+- revisão administrativa somente leitura de pedido mínimo, taxa de entrega e horários semanais.
+- revisão administrativa somente leitura de variações, adicionais e limites de seleção por produto.
+- revisão administrativa somente leitura do perfil, canal planejado, pagamento e modalidades do estabelecimento.
+- fundação reversível para futura escrita do perfil do tenant, com versão otimista e auditoria própria ainda sem privilégio de runtime.
+- contrato portável para futura edição de nome curto e slogan, ainda sem adaptador PostgreSQL ou interface.
+- adaptador PostgreSQL do perfil preparado para gate descartável, ainda desconectado do banco persistente e da interface.
+- composição `server-only` do perfil com identidade, membership e permissão específica derivadas novamente antes da escrita.
+- edição administrativa independente de nome curto e slogan, com confirmação, versão otimista e auditoria transacional.
+- repositório limitado e sanitizado para futura consulta da auditoria do perfil, ainda desconectado da interface e do banco persistente.
+- concessão persistente isolada de leitura da auditoria do perfil, ainda sem composição ou interface.
+- consulta administrativa limitada das alterações do perfil, sem UUID do ator ou identidade externa.
 - revisão administrativa somente leitura das modalidades habilitadas por produto.
+- cadastro administrativo de categorias com permissão própria, contexto interno derivado, confirmação e auditoria atômica.
+- contrato portável para futura ativação de “Consumo no local”, ainda sem alterar o tenant persistente ou produtos.
+- composição `server-only` de “Consumo no local” com modalidade, identidade e papel derivados, ainda sem ativação pela interface.
+- ativação administrativa confirmada de “Consumo no local” com produtos iniciais obrigatórios e auditoria atômica.
+- adaptador PostgreSQL de metadados de imagem aprovado no banco descartável e habilitação persistente preparada com privilégios mínimos, ainda sem armazenamento de objetos ou interface.
+- armazenamento Vercel Blob público isolado atrás de porta de servidor, com chaves imutáveis e exclusão restrita, ainda sem composição ou interface de upload.
+- composição operacional `server-only` de imagens com autorização renovada, limites de frequência e tempo e compensação de falhas, ainda sem entrada HTTP ou interface.
+- interface administrativa local para logo e imagens de produtos com prévia, texto alternativo e processamento seguro;
+- leitura pública de imagens pelo tenant com URL/namespace revalidados, metadados internos omitidos e fallback acessível.
+- reconciliação manual de imagens em simulação por padrão, com carência, confirmação dupla para exclusão e métricas agregadas de armazenamento.
+- gate ponta a ponta local de imagens documentado, cobrindo autorização, processamento, Blob, PostgreSQL, leitura pública, responsividade, PWA e reconciliação sem exclusão.
+- formulário administrativo único para criar e editar produtos, com ID/slug derivados, disponibilidade selecionada persistida, atualização relacional atômica, imagem opcional coordenada e exclusão por arquivamento lógico auditado.
+- painel administrativo somente leitura em `/admin`, com indicadores e pendências derivados do catálogo autorizado; configurações de Perfil, Operação, Categorias e Produtos separadas em `/admin/configuracoes` e endereçáveis por seção.
+- configuração operacional versionada de pedido mínimo, taxa e distância máxima de entrega, WhatsApp comercial, pagamentos presenciais e horários de segunda a domingo, com autorização renovada e auditoria que não replica o contato; distância ainda não bloqueia pedidos nem coleta localização.
 
 O catálogo é demonstrativo. A fundação não envia pedidos, não coleta dados pessoais e não exige credenciais. WhatsApp será o primeiro canal de envio e o pagamento ocorrerá no atendimento ou entrega, mas essas capacidades ainda não estão implementadas.
 
@@ -60,12 +86,15 @@ As superfícies de comando são Server Actions internas e separadas para disponi
 
 Variações e adicionais podem ser selecionados em uma caixa de diálogo acessível. Antes da prévia, todas as linhas e valores são reconstruídos pelo catálogo atual. A mensagem pode ser copiada localmente, mas não abre WhatsApp, não solicita dados pessoais e não envia ou confirma um pedido.
 
-Tenants demonstrativos:
+Rotas demonstrativas originais:
 
 - `/cardapio/mesa-viva`;
 - `/cardapio/casa-do-porto`.
 
-A raiz `/` redireciona para o primeiro catálogo. Slugs desconhecidos retornam uma página 404 própria.
+A raiz `/` redireciona para o diretório de cardápios. Slugs desconhecidos retornam uma página 404 própria.
+No ambiente persistente atual, os atalhos consultam o primeiro slug publicado no
+PostgreSQL. A rota histórica `/cardapio/mesa-viva` redireciona para esse tenant
+quando ele for o único catálogo persistido, preservando links locais anteriores.
 
 ## Tecnologias
 
@@ -82,6 +111,24 @@ Requisitos: Node.js `^20.19.0`, `^22.13.0` ou `>=24`, e npm.
 npm ci
 npm run dev
 ```
+
+No ambiente de desenvolvimento, uma barra local de navegação expõe os
+atalhos para o cardápio demonstrativo, primeiro acesso, login administrativo,
+painel e configurações. Ela não
+é incluída em produção e não altera os controles de autenticação,
+vínculo interno, membership ou autorização das rotas administrativas.
+
+A rota pública `/login` separa explicitamente os perfis: clientes continuam
+para o cardápio sem conta nesta fase; assinantes convidados seguem para o login
+administrativo protegido. Clientes não recebem atalhos para painel ou
+configurações.
+
+A rota `/planos` apresenta os planos mensais Essencial (R$ 150) e Profissional
+(R$ 250). O cadastro usa Clerk e o checkout recorrente usa Stripe sandbox. A
+página de retorno não concede tenant ou papel. A ativação usa webhook assinado
+e persistência idempotente; no ambiente local, exige aplicar a migration `0020`
+e configurar `STRIPE_WEBHOOK_SECRET`. A produção continua bloqueada pelos gates
+de risco, conciliação e cadastro legal/fiscal.
 
 Validação completa:
 

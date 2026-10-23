@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function Home() {
-  redirect("/cardapio/mesa-viva");
+  redirect("/cardapio");
 }

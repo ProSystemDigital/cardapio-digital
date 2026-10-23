@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { FaMinus, FaPen, FaPlus, FaSearch, FaShoppingBag, FaTimes, FaTrash } from "react-icons/fa";
 import {
@@ -22,11 +24,12 @@ import { buildOrderDraft, type OrderDraft } from "../../../domain/order-draft";
 import FulfillmentSelector from "../FulfillmentSelector/FulfillmentSelector";
 import OrderPreview from "../OrderPreview/OrderPreview";
 import ProductCustomizer from "../ProductCustomizer/ProductCustomizer";
+import { createLocalInteractionId } from "./local-interaction-id";
 import styles from "./MenuExperience.module.scss";
 
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 const fulfillmentLabels: Record<FulfillmentMode, string> = {
-  dine_in: "mesa",
+  dine_in: "na mesa",
   pickup: "retirada",
   delivery: "entrega",
 };
@@ -46,6 +49,7 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
   const [customization, setCustomization] = useState<CustomizationTarget | null>(null);
   const [cartError, setCartError] = useState("");
   const [fulfillmentMode, setFulfillmentMode] = useState<FulfillmentMode | null>(null);
+  const [selectedTable, setSelectedTable] = useState("");
   const [fulfillmentError, setFulfillmentError] = useState("");
   const [orderDraft, setOrderDraft] = useState<OrderDraft | null>(null);
   const [previewError, setPreviewError] = useState("");
@@ -68,7 +72,7 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
   const closeCustomizer = useCallback(() => setCustomization(null), []);
 
   const commitSelection = (selection: ProductSelection, editingLine?: CartLine) => {
-    const result = createCartLine(catalog, selection, editingLine?.id ?? crypto.randomUUID());
+    const result = createCartLine(catalog, selection, editingLine?.id ?? createLocalInteractionId());
     if (!result.ok) return result.errors;
 
     setLines((current) =>
@@ -115,6 +119,7 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
       return;
     }
     setFulfillmentMode(mode);
+    if (mode !== "dine_in") setSelectedTable("");
     setFulfillmentError("");
   };
 
@@ -123,7 +128,8 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
       catalog,
       lines,
       fulfillmentMode,
-      crypto.randomUUID(),
+      createLocalInteractionId(),
+      selectedTable || null,
     );
     if (!result.ok) {
       setPreviewError(result.errors.join(" "));
@@ -138,14 +144,26 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
   return (
     <main>
       <header className={styles.header}>
-        <a className={styles.brand} href="#inicio" aria-label={`${tenant.displayName}, início`}>
-          <span className={styles.brandMark}>{tenant.shortName}</span>
-          <span>{tenant.displayName}<small>{tenant.tagline}</small></span>
+        <a className={styles.brand} href="#inicio" aria-label={`${tenant.shortName}, início`}>
+          <span className={`${styles.brandMark} ${tenant.logo ? styles.brandLogo : ""}`}>
+            {tenant.logo ? (
+              <Image
+                alt={`Logo de ${tenant.shortName}`}
+                fill
+                sizes="45px"
+                src={tenant.logo.publicUrl}
+              />
+            ) : tenant.shortName}
+          </span>
+          <span>{tenant.shortName}<small>{tenant.tagline}</small></span>
         </a>
         <div className={styles.status}><span /> Horários configurados</div>
-        <button className={styles.cartButton} onClick={() => setCartOpen(true)} aria-label={`Abrir carrinho com ${itemCount} itens`}>
-          <FaShoppingBag aria-hidden="true" /> Carrinho<span>{itemCount}</span>
-        </button>
+        <div className={styles.headerActions}>
+          <Link className={styles.loginLink} href="/login">Login</Link>
+          <button className={styles.cartButton} onClick={() => setCartOpen(true)} aria-label={`Abrir carrinho com ${itemCount} itens`}>
+            <FaShoppingBag aria-hidden="true" /> Carrinho<span>{itemCount}</span>
+          </button>
+        </div>
       </header>
 
       <section className={styles.hero} id="inicio">
@@ -166,7 +184,20 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
           <div className={styles.grid}>
             {visibleProducts.map((product) => (
               <article className={styles.card} key={product.id}>
-                <div className={styles.foodVisual} aria-hidden="true"><span>{product.emoji}</span>{product.tag ? <small>{product.tag}</small> : null}</div>
+                <div
+                  className={`${styles.foodVisual} ${product.image ? styles.foodVisualWithImage : ""}`}
+                  aria-hidden={product.image ? undefined : true}
+                >
+                  {product.image ? (
+                    <Image
+                      alt={product.image.altText}
+                      fill
+                      sizes="(max-width: 650px) 100vw, (max-width: 950px) 50vw, 33vw"
+                      src={product.image.publicUrl}
+                    />
+                  ) : <span>{product.emoji}</span>}
+                  {product.tag ? <small>{product.tag}</small> : null}
+                </div>
                 <div className={styles.cardContent}>
                   <div><p>{categoryNames.get(product.categoryId)}</p><h3>{product.name}</h3></div>
                   <p className={styles.description}>{product.description}</p>
@@ -178,19 +209,19 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
         ) : <p className={styles.emptySearch}>Nenhum prato encontrado. Tente outra busca.</p>}
       </section>
 
-      <footer className={styles.footer}><strong>{tenant.displayName}</strong><p>Cardápio demonstrativo · preços em reais</p><a href="#inicio">Voltar ao topo ↑</a></footer>
+      <footer className={styles.footer}><strong>{tenant.shortName}</strong><p>Cardápio demonstrativo · preços em reais</p><a href="#inicio">Voltar ao topo ↑</a></footer>
 
       {cartOpen ? <button className={styles.backdrop} onClick={() => setCartOpen(false)} aria-label="Fechar carrinho" /> : null}
       <aside className={`${styles.drawer} ${cartOpen ? styles.drawerOpen : ""}`} aria-label="Carrinho" aria-hidden={!cartOpen}>
         <div className={styles.drawerHeader}><div><p className={styles.eyebrow}>Seu pedido</p><h2>Carrinho</h2></div><button onClick={() => setCartOpen(false)} aria-label="Fechar carrinho"><FaTimes aria-hidden="true" /></button></div>
-        <FulfillmentSelector modes={tenant.fulfillmentModes} selectedMode={fulfillmentMode} onSelect={selectFulfillmentMode} />
+        <FulfillmentSelector diningTables={tenant.operations.diningTables} modes={tenant.fulfillmentModes} onSelect={selectFulfillmentMode} onSelectTable={setSelectedTable} selectedMode={fulfillmentMode} selectedTable={selectedTable} />
         {fulfillmentError ? <p className={styles.fulfillmentError} role="alert">{fulfillmentError}</p> : null}
         <div className={styles.cartItems}>
           {lines.length ? lines.map((line) => {
             const product = productsById.get(line.productId);
             if (!product) return null;
             const details = lineDetails(line, product);
-            return <div className={styles.cartItem} key={line.id}><span aria-hidden="true">{product.emoji}</span><div><strong>{product.name}</strong>{details ? <small>{details}</small> : null}<small>{formatPrice(line.unitPriceInCents)} cada</small><div className={styles.lineActions}>{product.variations?.length || product.addonGroups?.length ? <button onClick={() => setCustomization({ product, line })}><FaPen aria-hidden="true" /> Editar</button> : null}<button onClick={() => setLines((current) => changeLineQuantity(current, line.id, -line.quantity))}><FaTrash aria-hidden="true" /> Remover</button></div></div><div className={styles.quantity}><button onClick={() => setLines((current) => changeLineQuantity(current, line.id, -1))} aria-label={`Remover uma unidade de ${product.name}`}><FaMinus aria-hidden="true" /></button><span>{line.quantity}</span><button onClick={() => setLines((current) => changeLineQuantity(current, line.id, 1))} aria-label={`Adicionar uma unidade de ${product.name}`}><FaPlus aria-hidden="true" /></button></div></div>;
+            return <div className={styles.cartItem} key={line.id}><span className={`${styles.cartItemVisual} ${product.image ? styles.cartItemImage : ""}`}>{product.image ? <Image alt="" fill sizes="48px" src={product.image.publicUrl} /> : <span aria-hidden="true">{product.emoji}</span>}</span><div><strong>{product.name}</strong>{details ? <small>{details}</small> : null}<small>{formatPrice(line.unitPriceInCents)} cada</small><div className={styles.lineActions}>{product.variations?.length || product.addonGroups?.length ? <button onClick={() => setCustomization({ product, line })}><FaPen aria-hidden="true" /> Editar</button> : null}<button onClick={() => setLines((current) => changeLineQuantity(current, line.id, -line.quantity))}><FaTrash aria-hidden="true" /> Remover</button></div></div><div className={styles.quantity}><button onClick={() => setLines((current) => changeLineQuantity(current, line.id, -1))} aria-label={`Remover uma unidade de ${product.name}`}><FaMinus aria-hidden="true" /></button><span>{line.quantity}</span><button onClick={() => setLines((current) => changeLineQuantity(current, line.id, 1))} aria-label={`Adicionar uma unidade de ${product.name}`}><FaPlus aria-hidden="true" /></button></div></div>;
           }) : <div className={styles.emptyCart}><span>🛍️</span><h3>Seu carrinho está vazio</h3><p>Adicione um prato para começar o pedido.</p></div>}
           {cartError ? <p className={styles.cartError} role="alert">{cartError}</p> : null}
         </div>
@@ -201,8 +232,8 @@ export default function MenuExperience({ catalog }: Readonly<{ catalog: TenantCa
           {quote.missingMinimumInCents > 0 && lines.length > 0 ? <p className={styles.minimumWarning}>Faltam {formatPrice(quote.missingMinimumInCents)} para o pedido mínimo.</p> : null}
           {!fulfillmentMode ? <small>Selecione mesa, retirada ou entrega para calcular a cotação.</small> : <small>Cotação demonstrativa para {fulfillmentLabels[fulfillmentMode]}. Nenhum pedido foi enviado.</small>}
           {previewError ? <p className={styles.cartError} role="alert">{previewError}</p> : null}
-          <button disabled={!quote.canContinue} onClick={openOrderPreview} aria-describedby="order-status">Revisar prévia</button>
-          <span id="order-status" className={styles.srOnly}>{quote.canContinue ? "Cotação válida para gerar prévia local. Nenhum pedido será enviado." : quote.errors.join(" ")}</span>
+          <button disabled={!quote.canContinue || (fulfillmentMode === "dine_in" && !selectedTable)} onClick={openOrderPreview} aria-describedby="order-status">Revisar prévia</button>
+          <span id="order-status" className={styles.srOnly}>{quote.canContinue && (fulfillmentMode !== "dine_in" || selectedTable) ? "Cotação válida para gerar prévia local. Nenhum pedido será enviado." : fulfillmentMode === "dine_in" && !selectedTable ? "Selecione uma mesa identificada." : quote.errors.join(" ")}</span>
         </div>
       </aside>
 

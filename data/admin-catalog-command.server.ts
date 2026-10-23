@@ -26,12 +26,13 @@ function getCommandPool(): Pool | null {
   return commandPool;
 }
 
-export async function updateDerivedProductAvailability(input: {
+export async function updateDerivedProductAvailabilityOptions(input: {
   identity: TrustedIdentity;
   tenantId: TenantId;
   productId: string;
   expectedVersion: number;
   isAvailable: boolean;
+  fulfillmentModes?: readonly FulfillmentMode[];
 }): Promise<CatalogMutationResult | null> {
   const pool = getCommandPool();
   if (!pool) return null;
@@ -48,8 +49,46 @@ export async function updateDerivedProductAvailability(input: {
     productId: input.productId,
     expectedVersion: input.expectedVersion,
     isAvailable: input.isAvailable,
+    ...(input.fulfillmentModes === undefined ? {} : { fulfillmentModes: input.fulfillmentModes }),
   });
 }
+
+export async function updateDerivedProduct(input: {
+  identity: TrustedIdentity;
+  tenantId: TenantId;
+  productId: string;
+  expectedVersion: number;
+  name: string;
+  description: string;
+  priceInCents: number;
+  categoryId: string;
+  isAvailable: boolean;
+  fulfillmentModes?: readonly FulfillmentMode[];
+}): Promise<CatalogMutationResult | null> {
+  const pool = getCommandPool();
+  if (!pool) return null;
+  const service = new AuthorizedCatalogAdministrationService(
+    new AuthorizationService(new PostgresAuthorizationRepository(pool)),
+    new CatalogAdministrationService(new PostgresCatalogCommandRepository(pool)),
+  );
+  return service.updateProduct(input.identity, input);
+}
+
+export async function archiveDerivedProduct(input: {
+  identity: TrustedIdentity;
+  tenantId: TenantId;
+  productId: string;
+  expectedVersion: number;
+}): Promise<CatalogMutationResult | null> {
+  const pool = getCommandPool();
+  if (!pool) return null;
+  const service = new AuthorizedCatalogAdministrationService(
+    new AuthorizationService(new PostgresAuthorizationRepository(pool)),
+    new CatalogAdministrationService(new PostgresCatalogCommandRepository(pool)),
+  );
+  return service.archiveProduct(input.identity, input);
+}
+
 
 export async function updateDerivedProductPrice(input: {
   identity: TrustedIdentity;
@@ -116,27 +155,5 @@ export async function updateDerivedProductCategory(input: {
     productId: input.productId,
     expectedVersion: input.expectedVersion,
     categoryId: input.categoryId,
-  });
-}
-
-export async function updateDerivedProductFulfillmentModes(input: {
-  identity: TrustedIdentity;
-  tenantId: TenantId;
-  productId: string;
-  expectedVersion: number;
-  fulfillmentModes: readonly FulfillmentMode[];
-}): Promise<CatalogMutationResult | null> {
-  const pool = getCommandPool();
-  if (!pool) return null;
-
-  const service = new AuthorizedCatalogAdministrationService(
-    new AuthorizationService(new PostgresAuthorizationRepository(pool)),
-    new CatalogAdministrationService(new PostgresCatalogCommandRepository(pool)),
-  );
-  return service.updateProduct(input.identity, {
-    tenantId: input.tenantId,
-    productId: input.productId,
-    expectedVersion: input.expectedVersion,
-    fulfillmentModes: input.fulfillmentModes,
   });
 }

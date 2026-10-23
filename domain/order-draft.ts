@@ -16,6 +16,7 @@ export type OrderDraft = {
   tenantId: string;
   tenantName: string;
   fulfillmentMode: FulfillmentMode;
+  diningTable?: string;
   items: readonly OrderDraftItem[];
   subtotalInCents: number;
   deliveryFeeInCents: number;
@@ -32,9 +33,13 @@ export function buildOrderDraft(
   lines: readonly CartLine[],
   mode: FulfillmentMode | null,
   localReference: string,
+  diningTable: string | null = null,
 ): OrderDraftResult {
   if (!mode) return { ok: false, errors: ["Selecione uma modalidade de atendimento."] };
   if (!localReference.trim()) return { ok: false, errors: ["Referência local inválida."] };
+  if (mode === "dine_in" && (!diningTable || !catalog.tenant.operations.diningTables.includes(diningTable))) {
+    return { ok: false, errors: ["Selecione uma mesa válida do estabelecimento."] };
+  }
 
   const refreshedLines: CartLine[] = [];
   const errors: string[] = [];
@@ -89,8 +94,9 @@ export function buildOrderDraft(
     draft: Object.freeze({
       localReference,
       tenantId: catalog.tenant.id,
-      tenantName: catalog.tenant.displayName,
+      tenantName: catalog.tenant.shortName,
       fulfillmentMode: mode,
+      ...(mode === "dine_in" && diningTable ? { diningTable } : {}),
       items: Object.freeze(items.map((item) => Object.freeze(item))),
       subtotalInCents: quote.subtotalInCents,
       deliveryFeeInCents: quote.deliveryFeeInCents,
@@ -101,7 +107,7 @@ export function buildOrderDraft(
 }
 
 const modeLabels: Record<FulfillmentMode, string> = {
-  dine_in: "Consumo em mesa",
+  dine_in: "Na mesa",
   pickup: "Retirada",
   delivery: "Entrega",
 };
@@ -123,6 +129,7 @@ export function formatOrderMessage(draft: OrderDraft): string {
     "PRÉVIA — PEDIDO NÃO ENVIADO",
     draft.tenantName,
     `Modalidade: ${modeLabels[draft.fulfillmentMode]}`,
+    ...(draft.diningTable ? [`Mesa: ${draft.diningTable}`] : []),
     "",
     ...itemLines,
     "",

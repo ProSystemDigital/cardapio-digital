@@ -108,3 +108,15 @@ test("formata mensagem determinística sem IDs internos ou dados pessoais", () =
   expect(message).not.toContain("internal-reference");
   expect(message).not.toMatch(/telefone|endereço|cliente|tenant-/i);
 });
+
+test("exige mesa configurada para atendimento na mesa e inclui a identificação na prévia", () => {
+  const cartLines = [line("burger", "line-table", { addonIds: ["bacon"] })];
+  expect(buildOrderDraft(mesaVivaCatalog, cartLines, "dine_in", "local-table")).toMatchObject({
+    ok: false,
+    errors: ["Selecione uma mesa válida do estabelecimento."],
+  });
+  expect(buildOrderDraft(mesaVivaCatalog, cartLines, "dine_in", "local-table", "Mesa inexistente")).toMatchObject({ ok: false });
+  const result = buildOrderDraft(mesaVivaCatalog, cartLines, "dine_in", "local-table", "Salão principal · Mesa 02");
+  expect(result).toMatchObject({ ok: true, draft: { fulfillmentMode: "dine_in", diningTable: "Salão principal · Mesa 02" } });
+  if (result.ok) expect(formatOrderMessage(result.draft)).toContain("Mesa: Salão principal · Mesa 02");
+});

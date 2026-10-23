@@ -6,6 +6,7 @@ export type AddonId = string;
 
 export type FulfillmentMode = "dine_in" | "pickup" | "delivery";
 export type PaymentTiming = "on_fulfillment";
+export type PaymentMethod = "pix" | "cash" | "credit_card" | "debit_card";
 export type TenantRole = "owner" | "manager" | "platform_admin";
 
 export type TenantProfile = {
@@ -14,6 +15,7 @@ export type TenantProfile = {
   displayName: string;
   shortName: string;
   tagline: string;
+  logo?: Readonly<{ publicUrl: string }>;
   fulfillmentModes: readonly FulfillmentMode[];
   paymentTiming: PaymentTiming;
   orderChannel: "whatsapp";
@@ -36,9 +38,14 @@ export type BusinessHours = {
 };
 
 export type TenantOperations = {
+  version?: number;
   businessHours: readonly BusinessHours[];
   minimumOrderInCents: number;
   deliveryFeeInCents?: number;
+  maximumDeliveryDistanceInMeters?: number;
+  whatsappNumber?: string;
+  paymentMethods?: readonly PaymentMethod[];
+  diningTables: readonly string[];
 };
 
 export type ProductVariation = {
@@ -79,6 +86,7 @@ export type Product = {
   priceInCents: number;
   emoji: string;
   tag?: string;
+  image?: Readonly<{ publicUrl: string; altText: string }>;
   isAvailable: boolean;
   fulfillmentModes: readonly FulfillmentMode[];
   variations?: readonly ProductVariation[];

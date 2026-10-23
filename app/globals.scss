@@ -46,6 +46,45 @@ a {
   outline-offset: 3px;
 }
 
+.development-navigation {
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  background: #081b14;
+  color: #f7f5ef;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.development-navigation span {
+  color: #c8f269;
+  font-weight: 700;
+}
+
+.development-navigation a {
+  padding: 0.35rem 0.55rem;
+  border: 1px solid rgb(247 245 239 / 28%);
+  border-radius: 999px;
+}
+
+.development-navigation a:hover {
+  border-color: #c8f269;
+  color: #c8f269;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none !important;
+  border-color: var(--leaf);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

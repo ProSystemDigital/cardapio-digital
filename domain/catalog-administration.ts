@@ -33,6 +33,12 @@ export type CatalogMutationResult = {
   version: number;
 };
 
+export type ArchiveProductCommand = {
+  tenantId: TenantId;
+  productId: ProductId;
+  expectedVersion: number;
+};
+
 export class CatalogAuthorizationError extends Error {}
 export class CatalogValidationError extends Error {}
 export class CatalogConflictError extends Error {}
@@ -109,5 +115,14 @@ export function validateUpdateProductCommand(command: UpdateProductCommand): voi
     ) {
       throw new CatalogValidationError("Modalidades do produto inválidas.");
     }
+  }
+}
+
+export function validateArchiveProductCommand(command: ArchiveProductCommand): void {
+  if (!ENTITY_UUID_PATTERN.test(command.tenantId) || !ENTITY_UUID_PATTERN.test(command.productId)) {
+    throw new CatalogValidationError("Tenant ou produto inválido.");
+  }
+  if (!Number.isSafeInteger(command.expectedVersion) || command.expectedVersion < 1) {
+    throw new CatalogValidationError("Versão esperada inválida.");
   }
 }

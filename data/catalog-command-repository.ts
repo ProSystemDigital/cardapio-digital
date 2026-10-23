@@ -1,4 +1,5 @@
 import type {
+  ArchiveProductCommand,
   CatalogActor,
   CatalogMutationResult,
   UpdateProductCommand,
@@ -8,5 +9,9 @@ export interface CatalogCommandRepository {
   updateProduct(
     actor: CatalogActor,
     command: UpdateProductCommand,
+  ): Promise<CatalogMutationResult>;
+  archiveProduct?(
+    actor: CatalogActor,
+    command: ArchiveProductCommand,
   ): Promise<CatalogMutationResult>;
 }

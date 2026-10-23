@@ -35,6 +35,7 @@ export class PostgresCatalogAuditRepository implements CatalogAuditRepository {
              ON product.tenant_id = event.tenant_id
             AND product.id = event.entity_id
           WHERE event.tenant_id = $1
+            AND event.action = 'product.updated'
           ORDER BY event.occurred_at DESC, event.id DESC
           LIMIT $2`,
         [tenantId, limit],
