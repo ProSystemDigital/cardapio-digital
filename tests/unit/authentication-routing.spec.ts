@@ -24,6 +24,8 @@ test("layout raiz tolera somente atributos injetados no html e body antes da hid
 
 test("navegação de desenvolvimento revela rotas sem contornar autenticação", () => {
   const layout = read("app/layout.tsx");
+  const globals = read("app/globals.scss");
+  const menuStyles = read("app/components/MenuExperience/MenuExperience.module.scss");
   expect(layout).toContain('process.env.NODE_ENV === "development"');
   expect(layout).toContain('aria-label="Navegação de desenvolvimento"');
   expect(layout).toContain('href="/"');
@@ -32,6 +34,9 @@ test("navegação de desenvolvimento revela rotas sem contornar autenticação",
   expect(layout).toContain('href="/admin"');
   expect(layout).toContain('href="/admin/configuracoes"');
   expect(layout).not.toMatch(/auth\.protect\(\).*development|development.*auth\.protect\(\)/s);
+  expect(globals).toMatch(/\.development-navigation\s*\{[\s\S]*?z-index:\s*25;/);
+  expect(menuStyles).toMatch(/\.backdrop\s*\{[^}]*z-index:30;/);
+  expect(menuStyles).toMatch(/\.drawer\s*\{[^}]*z-index:40;/);
 });
 
 test("primeiro acesso separa cliente de assinante sem conceder acesso administrativo", () => {
